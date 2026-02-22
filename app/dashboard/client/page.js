@@ -11,13 +11,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useAuthStore from '@/lib/store/authStore';
 import useJobStore from '@/lib/store/jobStore';
 import { JobCategory, JobStatus, mockUsers } from '@/lib/db/schema';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import Link from 'next/link'; // ✅ ADDED: Link import for routing
 
 const ClientDashboard = () => {
   const { user } = useAuthStore();
@@ -297,7 +297,10 @@ const ClientDashboard = () => {
                                         <span>{proposal.estimatedDays} days</span>
                                       </div>
                                     </div>
-                                    <Button size="sm">View Profile</Button>
+                                    {/* ✅ FIXED: Button now properly links to the freelancer's public profile */}
+                                    <Button size="sm" asChild>
+                                      <Link href={`/${freelancer?.username}`}>View Profile</Link>
+                                    </Button>
                                   </div>
                                 );
                               })}

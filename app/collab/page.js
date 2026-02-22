@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Users, Clock } from 'lucide-react';
+import { Plus, Users } from 'lucide-react'; // ✅ FIX: Unused 'Clock' removed
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -15,6 +15,7 @@ import { mockCollabRooms, mockUsers } from '@/lib/db/schema';
 import useAuthStore from '@/lib/store/authStore';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link'; // ✅ FIX: Added Link for Next.js routing
 
 const CollabPage = () => {
   const { user, isAuthenticated } = useAuthStore();
@@ -191,8 +192,9 @@ const CollabPage = () => {
                           <Button>
                             Express Interest
                           </Button>
+                          {/* ✅ FIX: Replaced <a> tag with Next.js Link component */}
                           <Button variant="outline" asChild>
-                            <a href={`/${creator?.username}`}>View Profile</a>
+                            <Link href={`/${creator?.username}`}>View Profile</Link>
                           </Button>
                         </div>
                       </CardContent>

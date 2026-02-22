@@ -12,6 +12,42 @@ import useJobStore from '@/lib/store/jobStore';
 import { mockJobs } from '@/lib/db/schema';
 import Link from 'next/link';
 
+// 🛠️ FIX: KanbanColumn ko bahar nikala gaya taaki UI flicker na kare
+const KanbanColumn = ({ title, tasks, status, icon: Icon }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center text-base">
+        <Icon className="mr-2 h-5 w-5" />
+        {title}
+        <Badge variant="secondary" className="ml-auto">{tasks.length}</Badge>
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-3">
+        {tasks.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">No tasks</p>
+        ) : (
+          tasks.map((task) => (
+            <motion.div
+              key={task.id}
+              whileHover={{ scale: 1.02 }}
+              className="p-3 bg-muted rounded-lg cursor-move group"
+            >
+              <div className="flex items-start gap-2">
+                <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{task.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{task.project}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const FreelancerDashboard = () => {
   const { user } = useAuthStore();
   const { proposals } = useJobStore();
@@ -35,41 +71,6 @@ const FreelancerDashboard = () => {
   const getJobForProposal = (jobId) => {
     return mockJobs.find(j => j.id === jobId);
   };
-
-  const KanbanColumn = ({ title, tasks, status, icon: Icon }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center text-base">
-          <Icon className="mr-2 h-5 w-5" />
-          {title}
-          <Badge variant="secondary" className="ml-auto">{tasks.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {tasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No tasks</p>
-          ) : (
-            tasks.map((task) => (
-              <motion.div
-                key={task.id}
-                whileHover={{ scale: 1.02 }}
-                className="p-3 bg-muted rounded-lg cursor-move group"
-              >
-                <div className="flex items-start gap-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{task.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{task.project}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="container py-8">

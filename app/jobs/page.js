@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +17,67 @@ import { JobCategory } from '@/lib/db/schema';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+// 🛠️ FIX: FilterSidebar ko JobsPage function ke bahar nikala gaya hai 
+// taaki unnecessary re-renders na ho.
+const FilterSidebar = ({ filters, setFilters }) => (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <Label>Category</Label>
+      <Select value={filters.category || 'all'} onValueChange={(val) => setFilters({ category: val === 'all' ? null : val })}>
+        <SelectTrigger>
+          <SelectValue placeholder="All Categories" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Categories</SelectItem>
+          {Object.values(JobCategory).map((cat) => (
+            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="urgent">Urgent SOS Only</Label>
+        <Switch
+          id="urgent"
+          checked={filters.urgentOnly}
+          onCheckedChange={(checked) => setFilters({ urgentOnly: checked })}
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Popular Skills</Label>
+      <div className="flex flex-wrap gap-2">
+        {['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'MongoDB'].map((skill) => (
+          <Badge
+            key={skill}
+            variant={filters.skills.includes(skill) ? 'default' : 'outline'}
+            className="cursor-pointer transition-colors hover:bg-primary/80"
+            onClick={() => {
+              const newSkills = filters.skills.includes(skill)
+                ? filters.skills.filter(s => s !== skill)
+                : [...filters.skills, skill];
+              setFilters({ skills: newSkills });
+            }}
+          >
+            {skill}
+          </Badge>
+        ))}
+      </div>
+    </div>
+
+    <Button
+      variant="outline"
+      className="w-full"
+      onClick={() => setFilters({ category: null, budgetMin: 0, budgetMax: 100000, skills: [], urgentOnly: false })}
+    >
+      Clear Filters
+    </Button>
+  </div>
+);
+
 const JobsPage = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [proposalModalOpen, setProposalModalOpen] = useState(false);
@@ -28,7 +88,7 @@ const JobsPage = () => {
 
   useEffect(() => {
     setFilteredJobs(getFilteredJobs());
-  }, [filters]);
+  }, [filters, getFilteredJobs]); // ✅ FIX: getFilteredJobs ko dependency array me add kiya
 
   const handleApply = (job) => {
     if (!isAuthenticated) {
@@ -44,65 +104,6 @@ const JobsPage = () => {
     setProposalModalOpen(true);
   };
 
-  const FilterSidebar = () => (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label>Category</Label>
-        <Select value={filters.category || 'all'} onValueChange={(val) => setFilters({ category: val === 'all' ? null : val })}>
-          <SelectTrigger>
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {Object.values(JobCategory).map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="urgent">Urgent SOS Only</Label>
-          <Switch
-            id="urgent"
-            checked={filters.urgentOnly}
-            onCheckedChange={(checked) => setFilters({ urgentOnly: checked })}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Popular Skills</Label>
-        <div className="flex flex-wrap gap-2">
-          {['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'MongoDB'].map((skill) => (
-            <Badge
-              key={skill}
-              variant={filters.skills.includes(skill) ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => {
-                const newSkills = filters.skills.includes(skill)
-                  ? filters.skills.filter(s => s !== skill)
-                  : [...filters.skills, skill];
-                setFilters({ skills: newSkills });
-              }}
-            >
-              {skill}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={() => setFilters({ category: null, budgetMin: 0, budgetMax: 100000, skills: [], urgentOnly: false })}
-      >
-        Clear Filters
-      </Button>
-    </div>
-  );
-
   return (
     <div className="container py-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -116,7 +117,7 @@ const JobsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <FilterSidebar />
+              <FilterSidebar filters={filters} setFilters={setFilters} />
             </CardContent>
           </Card>
         </aside>
@@ -143,7 +144,7 @@ const JobsPage = () => {
                   <SheetTitle>Filters</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
-                  <FilterSidebar />
+                  <FilterSidebar filters={filters} setFilters={setFilters} />
                 </div>
               </SheetContent>
             </Sheet>
@@ -170,6 +171,7 @@ const JobsPage = () => {
                   />
                 </Badge>
               )}
+              {/* YAHAN FIX HAI: map function ko properly ))} se close kiya gaya hai */}
               {filters.skills.map((skill) => (
                 <Badge key={skill} variant="secondary">
                   {skill}
@@ -178,10 +180,10 @@ const JobsPage = () => {
                     onClick={() => setFilters({ skills: filters.skills.filter(s => s !== skill) })}
                   />
                 </Badge>
-              ))}
+              ))} 
             </div>
           )}
-
+          
           {/* Jobs Grid */}
           <div className="grid gap-6">
             {filteredJobs.length > 0 ? (
