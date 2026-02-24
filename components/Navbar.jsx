@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Search, Moon, Sun, Menu, X, Zap } from 'lucide-react';
+import { Search, Moon, Sun, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,11 +30,26 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="relative">
-            <Zap className="h-7 w-7 text-primary" fill="currentColor" />
-            <div className="absolute -inset-1 bg-primary/20 blur-md rounded-full" />
+        {/* 🚀 UPDATED LOGO SECTION WITH GLOW */}
+        <Link href="/" className="flex items-center space-x-2 group">
+          <div className="relative flex items-center justify-center w-8 h-8">
+            {/* ✨ The Minimal Glow Effect ✨ */}
+            <div className="absolute -inset-2 bg-primary/20 blur-md rounded-full z-0 transition-all duration-300 group-hover:bg-primary/30 group-hover:blur-lg" />
+
+            {/* Light Mode Logo (z-10 to stay on top of glow) */}
+            <Image 
+              src="/logo_light.png" 
+              alt="Nainix Logo" 
+              fill
+              className="object-contain block dark:hidden relative z-10"
+            />
+            {/* Dark Mode Logo (z-10 to stay on top of glow) */}
+            <Image 
+              src="/logo_dark.png" 
+              alt="Nainix Logo" 
+              fill
+              className="object-contain hidden dark:block relative z-10"
+            />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Nainix
