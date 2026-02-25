@@ -7,6 +7,9 @@ import { Toaster } from '@/components/ui/sonner';
 export const metadata = {
   title: 'Nainix - 0% Commission Freelancing Platform',
   description: 'Revolutionary freelancing platform for tech and coding. 0% commission. Direct connections.',
+  icons: {
+    icon: '/logo_light.png',
+  },
 };
 
 export default function RootLayout({ children }) {
