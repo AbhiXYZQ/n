@@ -35,26 +35,53 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock registration
-    setTimeout(() => {
-      const newUser = {
-        id: uuidv4(),
-        role,
-        ...formData,
-        bio: '',
-        verifiedBadges: [],
-        socialLinks: {},
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.username}`,
-        skills: [],
-        portfolio: [],
-        videoIntro: null
-      };
+    const trimmedData = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      username: formData.username.trim(),
+      password: formData.password,
+    };
 
-      login(newUser);
-      toast.success('Account created successfully!');
-      router.push(role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
+    if (!trimmedData.name || !trimmedData.email || !trimmedData.username || !trimmedData.password) {
+      toast.error('Please fill all required fields.');
       setLoading(false);
-    }, 1000);
+      return;
+    }
+
+    if (trimmedData.password.length < 6) {
+      toast.error('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: uuidv4(),
+          role,
+          ...trimmedData,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        toast.error(result.message || 'Unable to create account.');
+        setLoading(false);
+        return;
+      }
+
+      login(result.user);
+      toast.success('Account created successfully!');
+      router.push(result.user.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
+    } catch (error) {
+      toast.error('Unable to create account right now. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {

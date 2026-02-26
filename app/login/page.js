@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import useAuthStore from '@/lib/store/authStore';
-import { mockUsers } from '@/lib/db/schema';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -24,18 +23,32 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock authentication
-    setTimeout(() => {
-      const user = mockUsers.find(u => u.email === email);
-      if (user) {
-        login(user);
-        toast.success('Welcome back!');
-        router.push(user.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
-      } else {
-        toast.error('Invalid credentials');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        toast.error(result.message || 'Unable to login.');
+        setLoading(false);
+        return;
       }
+
+      login(result.user);
+      toast.success('Welcome back!');
+      router.push(result.user.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
+    } catch (error) {
+      toast.error('Unable to login right now. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1000);
+      
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -145,14 +158,8 @@ const LoginPage = () => {
               </Link>
             </div>
 
-            {/* Demo Credentials */}
             <div className="mt-6 p-4 rounded-lg bg-muted border border-border/50">
-              <p className="text-sm font-semibold mb-2">Demo Accounts:</p>
-              <div className="text-xs space-y-1">
-                <p><strong>Freelancer:</strong> sarah@example.com</p>
-                <p><strong>Client:</strong> contact@techstartup.com</p>
-                <p className="text-muted-foreground mt-2">(Any password works for demo)</p>
-              </div>
+              <p className="text-sm font-semibold">Use the account you created on Register page.</p>
             </div>
           </CardContent>
         </Card>
