@@ -7,6 +7,14 @@ import { createSessionPayload, setSessionCookie } from '@/lib/auth/session';
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 const normalizeUsername = (username = '') => username.trim().toLowerCase();
 
+function isValidEmail(email = '') {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone(phone = '') {
+  return /^\+?[1-9]\d{7,14}$/.test(phone.replace(/[\s-]/g, ''));
+}
+
 function isValidUrl(value = '') {
   if (!value) return true;
   try {
@@ -50,15 +58,24 @@ export async function POST(request) {
     const role = body?.role;
     const phone = body?.phone?.trim();
     const country = body?.country?.trim();
-    const timezone = body?.timezone?.trim();
+    const state = body?.state?.trim();
+    const city = body?.city?.trim();
     const bio = body?.bio?.trim();
     const linkedin = body?.linkedin?.trim() || '';
     const github = body?.github?.trim() || '';
     const acceptTerms = !!body?.acceptTerms;
     const roleDetails = body?.roleDetails || {};
 
-    if (!name || !email || !username || !password || !role || !phone || !country || !timezone || !bio) {
+    if (!name || !email || !username || !password || !role || !phone || !country || !state || !city || !bio) {
       return NextResponse.json({ success: false, message: 'All fields are required.' }, { status: 400 });
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ success: false, message: 'Please enter a valid email address.' }, { status: 400 });
+    }
+
+    if (!isValidPhone(phone)) {
+      return NextResponse.json({ success: false, message: 'Please enter a valid phone number in international format.' }, { status: 400 });
     }
 
     if (password.length < 6) {
@@ -77,7 +94,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'You must accept terms and privacy policy.' }, { status: 400 });
     }
 
-    if (!isValidUrl(linkedin) || !isValidUrl(github)) {
+    if ((linkedin && !isValidUrl(linkedin)) || (github && !isValidUrl(github))) {
       return NextResponse.json({ success: false, message: 'Please provide valid social profile URLs.' }, { status: 400 });
     }
 
@@ -111,10 +128,6 @@ export async function POST(request) {
         return NextResponse.json({ success: false, message: 'Freelancer details are incomplete.' }, { status: 400 });
       }
 
-      if (!linkedin && !github) {
-        return NextResponse.json({ success: false, message: 'Add at least LinkedIn or GitHub URL.' }, { status: 400 });
-      }
-
       if (!isValidUrl(freelancerRoleDetails.portfolioUrl)) {
         return NextResponse.json({ success: false, message: 'Invalid portfolio URL.' }, { status: 400 });
       }
@@ -140,12 +153,15 @@ export async function POST(request) {
     await ensureIndexes(usersCollection);
 
     const existingUser = await usersCollection.findOne({
-      $or: [{ email }, { username }],
+      $or: [{ email }, { username }, { phone }],
     });
 
     if (existingUser) {
       if (existingUser.email === email) {
         return NextResponse.json({ success: false, message: 'Email is already registered.' }, { status: 409 });
+      }
+      if (existingUser.phone === phone) {
+        return NextResponse.json({ success: false, message: 'Phone number is already registered.' }, { status: 409 });
       }
       return NextResponse.json({ success: false, message: 'Username is already taken.' }, { status: 409 });
     }
@@ -162,7 +178,8 @@ export async function POST(request) {
       bio,
       phone,
       country,
-      timezone,
+      state,
+      city,
       verifiedBadges: [],
       socialLinks: {
         ...(linkedin ? { linkedin } : {}),
@@ -179,6 +196,12 @@ export async function POST(request) {
         profileVersion: 'premium-v1',
         termsAcceptedAt: now,
         completedAt: now,
+      },
+      contactVerification: {
+        emailVerified: false,
+        phoneVerified: false,
+        emailVerifiedAt: null,
+        phoneVerifiedAt: null,
       },
       monetization: {
         plan: 'FREE',

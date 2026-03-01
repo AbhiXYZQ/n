@@ -1,5 +1,6 @@
 const nextConfig = {
   output: 'standalone',
+  cleanDistDir: false,
   images: {
     unoptimized: true,
   },
