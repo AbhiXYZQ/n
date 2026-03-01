@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import useAuthStore from '@/lib/store/authStore';
-import { v4 as uuidv4 } from 'uuid';
 
 const RegisterPage = () => {
   const [role, setRole] = useState('FREELANCER');
@@ -20,7 +21,25 @@ const RegisterPage = () => {
     name: '',
     email: '',
     username: '',
-    password: ''
+    password: '',
+    phone: '',
+    country: '',
+    timezone: '',
+    bio: '',
+    linkedin: '',
+    github: '',
+    professionalTitle: '',
+    experienceYears: '',
+    hourlyRate: '',
+    skills: '',
+    availability: '',
+    portfolioUrl: '',
+    companyName: '',
+    companyWebsite: '',
+    companySize: '',
+    hiringGoal: '',
+    budgetRange: '',
+    acceptTerms: false
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -40,9 +59,27 @@ const RegisterPage = () => {
       email: formData.email.trim(),
       username: formData.username.trim(),
       password: formData.password,
+      phone: formData.phone.trim(),
+      country: formData.country.trim(),
+      timezone: formData.timezone.trim(),
+      bio: formData.bio.trim(),
+      linkedin: formData.linkedin.trim(),
+      github: formData.github.trim(),
+      professionalTitle: formData.professionalTitle.trim(),
+      experienceYears: formData.experienceYears,
+      hourlyRate: formData.hourlyRate,
+      skills: formData.skills.trim(),
+      availability: formData.availability,
+      portfolioUrl: formData.portfolioUrl.trim(),
+      companyName: formData.companyName.trim(),
+      companyWebsite: formData.companyWebsite.trim(),
+      companySize: formData.companySize,
+      hiringGoal: formData.hiringGoal.trim(),
+      budgetRange: formData.budgetRange,
+      acceptTerms: formData.acceptTerms,
     };
 
-    if (!trimmedData.name || !trimmedData.email || !trimmedData.username || !trimmedData.password) {
+    if (!trimmedData.name || !trimmedData.email || !trimmedData.username || !trimmedData.password || !trimmedData.phone || !trimmedData.country || !trimmedData.timezone) {
       toast.error('Please fill all required fields.');
       setLoading(false);
       return;
@@ -54,16 +91,78 @@ const RegisterPage = () => {
       return;
     }
 
+    if (trimmedData.bio.length < 30) {
+      toast.error('Bio should be at least 30 characters.');
+      setLoading(false);
+      return;
+    }
+
+    if (!trimmedData.acceptTerms) {
+      toast.error('Please accept terms and privacy policy.');
+      setLoading(false);
+      return;
+    }
+
+    if (role === 'FREELANCER') {
+      const skillsCount = trimmedData.skills.split(',').map((skill) => skill.trim()).filter(Boolean).length;
+      if (!trimmedData.professionalTitle || !trimmedData.experienceYears || !trimmedData.hourlyRate || !trimmedData.availability || skillsCount < 3) {
+        toast.error('Freelancer profile requires title, experience, rate, availability, and at least 3 skills.');
+        setLoading(false);
+        return;
+      }
+
+      if (!trimmedData.github && !trimmedData.linkedin) {
+        toast.error('Add at least GitHub or LinkedIn profile link.');
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (role === 'CLIENT') {
+      if (!trimmedData.companyName || !trimmedData.companySize || !trimmedData.hiringGoal || !trimmedData.budgetRange) {
+        toast.error('Client profile requires company details, hiring goal, and budget range.');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
+      const roleDetails = role === 'FREELANCER'
+        ? {
+            professionalTitle: trimmedData.professionalTitle,
+            experienceYears: Number(trimmedData.experienceYears || 0),
+            hourlyRate: Number(trimmedData.hourlyRate || 0),
+            skills: trimmedData.skills.split(',').map((skill) => skill.trim()).filter(Boolean),
+            availability: trimmedData.availability,
+            portfolioUrl: trimmedData.portfolioUrl,
+          }
+        : {
+            companyName: trimmedData.companyName,
+            companyWebsite: trimmedData.companyWebsite,
+            companySize: trimmedData.companySize,
+            hiringGoal: trimmedData.hiringGoal,
+            budgetRange: trimmedData.budgetRange,
+          };
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: uuidv4(),
           role,
-          ...trimmedData,
+          name: trimmedData.name,
+          email: trimmedData.email,
+          username: trimmedData.username,
+          password: trimmedData.password,
+          phone: trimmedData.phone,
+          country: trimmedData.country,
+          timezone: trimmedData.timezone,
+          bio: trimmedData.bio,
+          linkedin: trimmedData.linkedin,
+          github: trimmedData.github,
+          acceptTerms: trimmedData.acceptTerms,
+          roleDetails,
         }),
       });
 
@@ -85,7 +184,8 @@ const RegisterPage = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
   return (
@@ -94,7 +194,7 @@ const RegisterPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-2xl"
       >
         <Card>
           <CardHeader className="space-y-1 text-center">
@@ -163,55 +263,299 @@ const RegisterPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    placeholder="johndoe"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your profile will be at nainix.me/{formData.username}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    placeholder="+91 9876543210"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    name="country"
+                    placeholder="India"
+                    value={formData.country}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Timezone</Label>
+                  <Input
+                    id="timezone"
+                    name="timezone"
+                    placeholder="Asia/Kolkata"
+                    value={formData.timezone}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin">LinkedIn URL</Label>
+                  <Input
+                    id="linkedin"
+                    name="linkedin"
+                    placeholder="https://linkedin.com/in/username"
+                    value={formData.linkedin}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="github">GitHub URL</Label>
+                  <Input
+                    id="github"
+                    name="github"
+                    placeholder="https://github.com/username"
+                    value={formData.github}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="John Doe"
-                  value={formData.name}
+                <Label htmlFor="bio">Professional Summary</Label>
+                <Textarea
+                  id="bio"
+                  name="bio"
+                  placeholder="Tell clients/freelancers what you do and your strengths..."
+                  value={formData.bio}
                   onChange={handleChange}
+                  rows={4}
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  placeholder="johndoe"
-                  value={formData.username}
+
+              {role === 'FREELANCER' ? (
+                <div className="space-y-4 rounded-lg border p-4">
+                  <h3 className="font-semibold">Freelancer Details</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="professionalTitle">Professional Title</Label>
+                      <Input
+                        id="professionalTitle"
+                        name="professionalTitle"
+                        placeholder="Full Stack Developer"
+                        value={formData.professionalTitle}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="experienceYears">Experience (Years)</Label>
+                      <Input
+                        id="experienceYears"
+                        name="experienceYears"
+                        type="number"
+                        min="0"
+                        placeholder="3"
+                        value={formData.experienceYears}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="hourlyRate">Hourly Rate (USD)</Label>
+                      <Input
+                        id="hourlyRate"
+                        name="hourlyRate"
+                        type="number"
+                        min="1"
+                        placeholder="30"
+                        value={formData.hourlyRate}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="availability">Availability</Label>
+                      <Select value={formData.availability} onValueChange={(val) => setFormData({ ...formData, availability: val })}>
+                        <SelectTrigger id="availability">
+                          <SelectValue placeholder="Select availability" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="LESS_THAN_10">Less than 10 hrs/week</SelectItem>
+                          <SelectItem value="PART_TIME">Part-time (10-20 hrs/week)</SelectItem>
+                          <SelectItem value="FULL_TIME">Full-time (30+ hrs/week)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="skills">Core Skills (comma-separated, min 3)</Label>
+                    <Input
+                      id="skills"
+                      name="skills"
+                      placeholder="React, Node.js, MongoDB, TypeScript"
+                      value={formData.skills}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="portfolioUrl">Portfolio URL (optional)</Label>
+                    <Input
+                      id="portfolioUrl"
+                      name="portfolioUrl"
+                      placeholder="https://yourportfolio.com"
+                      value={formData.portfolioUrl}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 rounded-lg border p-4">
+                  <h3 className="font-semibold">Client Company Details</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        name="companyName"
+                        placeholder="Acme Labs Pvt Ltd"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="companyWebsite">Company Website (optional)</Label>
+                      <Input
+                        id="companyWebsite"
+                        name="companyWebsite"
+                        placeholder="https://acme.com"
+                        value={formData.companyWebsite}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="companySize">Company Size</Label>
+                      <Select value={formData.companySize} onValueChange={(val) => setFormData({ ...formData, companySize: val })}>
+                        <SelectTrigger id="companySize">
+                          <SelectValue placeholder="Select company size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1_10">1-10</SelectItem>
+                          <SelectItem value="11_50">11-50</SelectItem>
+                          <SelectItem value="51_200">51-200</SelectItem>
+                          <SelectItem value="201_1000">201-1000</SelectItem>
+                          <SelectItem value="1000_PLUS">1000+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="budgetRange">Typical Project Budget</Label>
+                      <Select value={formData.budgetRange} onValueChange={(val) => setFormData({ ...formData, budgetRange: val })}>
+                        <SelectTrigger id="budgetRange">
+                          <SelectValue placeholder="Select budget range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="UNDER_1000">Under $1k</SelectItem>
+                          <SelectItem value="1000_5000">$1k - $5k</SelectItem>
+                          <SelectItem value="5000_20000">$5k - $20k</SelectItem>
+                          <SelectItem value="20000_PLUS">$20k+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hiringGoal">Hiring Goal</Label>
+                    <Textarea
+                      id="hiringGoal"
+                      name="hiringGoal"
+                      placeholder="What kind of developers or projects are you hiring for?"
+                      value={formData.hiringGoal}
+                      onChange={handleChange}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start space-x-2 rounded-lg border p-3">
+                <input
+                  id="acceptTerms"
+                  name="acceptTerms"
+                  type="checkbox"
+                  checked={formData.acceptTerms}
                   onChange={handleChange}
+                  className="mt-1"
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Your profile will be at nainix.me/{formData.username}
-                </p>
+                <Label htmlFor="acceptTerms" className="text-sm font-normal leading-5">
+                  I agree to the Terms of Service and Privacy Policy, and confirm my details are correct.
+                </Label>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Creating account...' : 'Create Account'}
               </Button>
