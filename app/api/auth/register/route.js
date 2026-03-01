@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomBytes, scryptSync } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { getDatabase } from '@/lib/db/mongodb';
+import { createSessionPayload, setSessionCookie } from '@/lib/auth/session';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 const normalizeUsername = (username = '') => username.trim().toLowerCase();
@@ -80,6 +81,12 @@ export async function POST(request) {
       skills: [],
       portfolio: [],
       videoIntro: null,
+      monetization: {
+        plan: 'FREE',
+        verificationBadgeActive: false,
+        aiProActive: false,
+        aiProActivatedAt: null
+      },
       passwordHash: hash,
       passwordSalt: salt,
       createdAt: new Date().toISOString(),
@@ -88,10 +95,18 @@ export async function POST(request) {
 
     await usersCollection.insertOne(newUser);
 
-    return NextResponse.json({
+    const safeUser = toSafeUser(newUser);
+    const response = NextResponse.json({
       success: true,
-      user: toSafeUser(newUser),
+      user: safeUser,
     });
+
+    setSessionCookie(
+      response,
+      createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email })
+    );
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       { success: false, message: 'Unable to create account right now.' },

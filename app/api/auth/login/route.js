@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { scryptSync, timingSafeEqual } from 'crypto';
 import { getDatabase } from '@/lib/db/mongodb';
+import { createSessionPayload, setSessionCookie } from '@/lib/auth/session';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 
@@ -47,10 +48,18 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'Incorrect password.' }, { status: 401 });
     }
 
-    return NextResponse.json({
+    const safeUser = toSafeUser(user);
+    const response = NextResponse.json({
       success: true,
-      user: toSafeUser(user),
+      user: safeUser,
     });
+
+    setSessionCookie(
+      response,
+      createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email })
+    );
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       { success: false, message: 'Unable to login right now.' },

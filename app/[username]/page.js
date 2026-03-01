@@ -3,22 +3,33 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Github, Linkedin, MessageCircle, Shield, Play } from 'lucide-react';
+import { Mail, Github, Linkedin, MessageCircle, Shield, Play, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { mockUsers } from '@/lib/db/schema';
 
 const ProfilePage = () => {
   const params = useParams();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Find user by username
-    const foundUser = mockUsers.find(u => u.username === params.username);
-    setUser(foundUser);
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`/api/users/${params.username}`);
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          setUser(null);
+          return;
+        }
+        setUser(result.user);
+      } catch (error) {
+        setUser(null);
+      }
+    };
+
+    fetchProfile();
   }, [params.username]);
 
   if (!user) {
@@ -68,6 +79,18 @@ const ProfilePage = () => {
                         {badge}
                       </Badge>
                     ))}
+                    {user?.monetization?.verificationBadgeActive && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        Verified
+                      </Badge>
+                    )}
+                    {user?.monetization?.aiProActive && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        AI Pro
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-lg text-muted-foreground">@{user.username}</p>
                 </div>

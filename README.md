@@ -12,6 +12,10 @@ A revolutionary freelancing platform built exclusively for developers and tech p
 - **Community Collab** - Partner with other freelancers on larger projects
 - **Dynamic Profiles** - Beautiful portfolio pages with video introductions
 - **Kanban Tracker** - Built-in project management for freelancers
+- **Featured Jobs Boost** - Clients can boost jobs for higher visibility
+- **Verification Badge** - Trust badge activation flow for client/freelancer profiles
+- **AI Pro Plan** - AI pitch enhancement and premium plan status flows
+- **Analytics Events** - Key user actions are recorded in analytics events collection
 
 ### Tech Stack
 - **Framework:** Next.js 14 (App Router)
@@ -171,10 +175,12 @@ DB_NAME=nainix_marketplace
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-4. Run the development server
+4. Start local development
 ```bash
-yarn dev
+npm run dev
 ```
+
+Note: `npmrun dev` is an invalid command. Always use `npm run dev`.
 
 5. Open [http://localhost:3000](http://localhost:3000)
 
@@ -265,7 +271,21 @@ useJobStore.getState()
   .getFilteredJobs() // Get filtered results
   .addJob()        // Add new job
   .addProposal()   // Add new proposal
+  .promoteJobToFeatured() // Boost visibility
+  .cleanupExpiredFeaturedJobs() // Auto-expire boosts
 ```
+
+## 💳 Monetization (Current)
+
+- **Featured Jobs:** boost job visibility in listing feed (mock payment success)
+- **Verification Badge:** activates trusted badge on profile (mock payment success)
+- **AI Pro:** enables premium plan status and proposal enhancement tools (mock payment success)
+- **Billing Records:** stored in `billing_transactions` for upgrade actions
+
+### Implemented Monetization APIs
+- `POST /api/monetization/upgrade`
+- `POST /api/jobs/feature`
+- `POST /api/analytics/event`
 
 ## 🚢 Deployment
 

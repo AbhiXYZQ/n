@@ -1,13 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, DollarSign, Zap } from 'lucide-react';
+import { Clock, DollarSign, Sparkles, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const JobCard = ({ job, onApply }) => {
+  const featuredActive = job.isFeatured && (!job.featuredUntil || new Date(job.featuredUntil) > new Date());
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -17,10 +19,19 @@ const JobCard = ({ job, onApply }) => {
     >
       <Card className={cn(
         "relative overflow-hidden transition-all hover:shadow-lg",
+        featuredActive && "border-primary/50",
         job.isUrgent && "border-red-500/50 urgent-glow"
       )}>
+        {featuredActive && (
+          <div className="absolute left-4 top-4 z-10">
+            <Badge className="bg-primary text-primary-foreground font-semibold">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Featured
+            </Badge>
+          </div>
+        )}
         {job.isUrgent && (
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-10">
             <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold">
               <Zap className="mr-1 h-3 w-3" fill="currentColor" />
               24H SOS
@@ -49,6 +60,12 @@ const JobCard = ({ job, onApply }) => {
               <span>{new Date(job.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
+
+          {featuredActive && job.featuredUntil && (
+            <p className="text-xs text-primary">
+              Featured until {new Date(job.featuredUntil).toLocaleDateString()}
+            </p>
+          )}
           
           <div className="flex flex-wrap gap-2">
             {job.requiredSkills.slice(0, 4).map((skill, idx) => (

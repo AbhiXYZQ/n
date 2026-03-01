@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 
 export const metadata = {
   title: 'Nainix - 0% Commission Freelancing Platform',
-  description: 'Revolutionary freelancing platform for tech and coding. 0% commission. Direct connections.',
+  description: 'Nainix helps clients hire developers and freelancers find projects. Post jobs, send proposals, and connect directly with 0% commission.',
   icons: {
     icon: '/logo_light.png',
   },

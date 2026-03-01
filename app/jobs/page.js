@@ -16,6 +16,8 @@ import useAuthStore from '@/lib/store/authStore';
 import { JobCategory } from '@/lib/db/schema';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 // 🛠️ FIX: FilterSidebar ko JobsPage function ke bahar nikala gaya hai 
 // taaki unnecessary re-renders na ho.
@@ -81,16 +83,38 @@ const FilterSidebar = ({ filters, setFilters }) => (
 const JobsPage = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [proposalModalOpen, setProposalModalOpen] = useState(false);
-  const { filters, setFilters, getFilteredJobs } = useJobStore();
+  const { filters, setFilters, getFilteredJobs, cleanupExpiredFeaturedJobs, fetchJobs } = useJobStore();
   const { isAuthenticated, user } = useAuthStore();
   const router = useRouter();
   const [filteredJobs, setFilteredJobs] = useState([]);
 
+  const featuredJobsCount = filteredJobs.filter(
+    (job) => job.isFeatured && (!job.featuredUntil || new Date(job.featuredUntil) > new Date())
+  ).length;
+
   useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
+
+  useEffect(() => {
+    cleanupExpiredFeaturedJobs();
     setFilteredJobs(getFilteredJobs());
-  }, [filters, getFilteredJobs]); // ✅ FIX: getFilteredJobs ko dependency array me add kiya
+  }, [filters, getFilteredJobs, cleanupExpiredFeaturedJobs]); // ✅ FIX: getFilteredJobs ko dependency array me add kiya
+
+  useEffect(() => {
+    trackEvent('jobs_page_viewed', {
+      authenticated: isAuthenticated,
+      role: user?.role || 'GUEST'
+    });
+  }, [isAuthenticated, user?.role]);
 
   const handleApply = (job) => {
+    trackEvent('job_apply_clicked', {
+      jobId: job.id,
+      featured: !!job.isFeatured,
+      urgent: !!job.isUrgent
+    });
+
     if (!isAuthenticated) {
       toast.error('Please login to submit a proposal');
       router.push('/login');
@@ -129,7 +153,7 @@ const JobsPage = () => {
             <div>
               <h1 className="text-3xl font-bold">Find Your Next Gig</h1>
               <p className="text-muted-foreground mt-1">
-                {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available
+                {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available • {featuredJobsCount} featured
               </p>
             </div>
             {/* Mobile Filter */}
@@ -185,10 +209,28 @@ const JobsPage = () => {
           )}
           
           {/* Jobs Grid */}
+          <Card>
+            <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Want faster visibility for your posting? Use Featured Jobs boost from client dashboard.
+              </p>
+              <Button variant="outline" asChild>
+                <Link href="/dashboard/client">Boost a Job</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-6">
             {filteredJobs.length > 0 ? (
               filteredJobs
-                .sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0))
+                .sort((a, b) => {
+                  const aFeatured = a.isFeatured && (!a.featuredUntil || new Date(a.featuredUntil) > new Date()) ? 1 : 0;
+                  const bFeatured = b.isFeatured && (!b.featuredUntil || new Date(b.featuredUntil) > new Date()) ? 1 : 0;
+                  if (bFeatured !== aFeatured) return bFeatured - aFeatured;
+                  const urgentDiff = (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0);
+                  if (urgentDiff !== 0) return urgentDiff;
+                  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                })
                 .map((job) => (
                   <JobCard key={job.id} job={job} onApply={handleApply} />
                 ))

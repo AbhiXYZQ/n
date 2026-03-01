@@ -9,41 +9,62 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import useJobStore from '@/lib/store/jobStore';
 import useAuthStore from '@/lib/store/authStore';
-import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 const ProposalModal = ({ open, onOpenChange, job }) => {
   const [pitch, setPitch] = useState('');
   const [estimatedDays, setEstimatedDays] = useState('');
   const [price, setPrice] = useState('');
   const [loading, setLoading] = useState(false);
-  const { addProposal } = useJobStore();
+  const { createProposal } = useJobStore();
   const { user } = useAuthStore();
+  const aiProActive = user?.monetization?.aiProActive;
+
+  const handleEnhancePitch = () => {
+    const basePitch = pitch.trim();
+    if (!basePitch) {
+      toast.error('Please write your pitch first.');
+      return;
+    }
+
+    const enhanced = `Hi, I reviewed your project and I can deliver this with a clear execution plan. ${basePitch} I will provide regular updates, milestone-based delivery, and production-ready quality.`;
+    setPitch(enhanced.slice(0, 300));
+    trackEvent('proposal_pitch_enhanced', {
+      jobId: job?.id,
+      userId: user?.id,
+      aiProActive: !!aiProActive,
+    });
+    toast.success('Pitch enhanced with AI Pro.');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock submission
-    setTimeout(() => {
-      const newProposal = {
-        id: uuidv4(),
+    try {
+      await createProposal({
         jobId: job.id,
-        freelancerId: user.id,
         pitch,
         estimatedDays: parseInt(estimatedDays),
         price: parseInt(price),
-        smartMatchScore: Math.floor(Math.random() * 20) + 80, // Mock score 80-100
-        createdAt: new Date().toISOString()
-      };
+      });
 
-      addProposal(newProposal);
+      trackEvent('proposal_submitted', {
+        jobId: job.id,
+        freelancerId: user.id,
+        aiProActive: !!aiProActive,
+      });
       toast.success('Proposal submitted successfully!');
       setPitch('');
       setEstimatedDays('');
       setPrice('');
       onOpenChange(false);
+    } catch (error) {
+      toast.error(error.message || 'Unable to submit proposal right now.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   if (!job) return null;
@@ -73,6 +94,16 @@ const ProposalModal = ({ open, onOpenChange, job }) => {
             <p className="text-xs text-muted-foreground text-right">
               {pitch.length}/300
             </p>
+            {aiProActive ? (
+              <Button type="button" size="sm" variant="secondary" onClick={handleEnhancePitch}>
+                Enhance with AI Pro
+              </Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                AI pitch enhancement is available in AI Pro.{' '}
+                <Link href="/pricing" className="text-primary hover:underline">Upgrade now</Link>
+              </p>
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-4">

@@ -6,7 +6,7 @@ import useAuthStore from '@/lib/store/authStore';
 import { toast } from 'sonner';
 
 const DashboardLayout = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const DashboardLayout = ({ children }) => {
     return null;
   }
 
-  return children;
+  return <main className="mx-auto w-full max-w-7xl">{children}</main>;
 };
 
 export default DashboardLayout;

@@ -15,15 +15,54 @@ import { useTheme } from 'next-themes';
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, login } = useAuthStore();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+
+  useEffect(() => {
+    const hydrateSession = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          if (isAuthenticated) {
+            logout();
+          }
+          return;
+        }
+
+        if (!isAuthenticated || user?.id !== result.user?.id) {
+          login(result.user);
+        }
+      } catch (error) {
+        if (isAuthenticated) {
+          logout();
+        }
+      }
+    };
+
+    hydrateSession();
+  }, [isAuthenticated, login, logout, user?.id]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+    } finally {
+      logout();
+      setMobileMenuOpen(false);
+      router.push('/');
+    }
+  };
 
   // Command menu
   const handleCommandSelect = (value) => {
     setOpen(false);
     if (value === 'jobs') router.push('/jobs');
     if (value === 'collab') router.push('/collab');
+    if (value === 'pricing') router.push('/pricing');
     if (value === 'dashboard') router.push(user?.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
   };
 
@@ -60,6 +99,12 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-6">
           <Link href="/jobs" className="text-sm font-medium hover:text-primary transition-colors">
             Find Work
+          </Link>
+          <Link href="/#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">
+            How it Works
+          </Link>
+          <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
+            Pricing
           </Link>
           <Link href="/collab" className="text-sm font-medium hover:text-primary transition-colors">
             Collab
@@ -127,7 +172,7 @@ const Navbar = () => {
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem onClick={handleLogout}>
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -156,6 +201,12 @@ const Navbar = () => {
           <Link href="/jobs" className="block px-4 py-2 hover:bg-muted rounded-md" onClick={() => setMobileMenuOpen(false)}>
             Find Work
           </Link>
+          <Link href="/#how-it-works" className="block px-4 py-2 hover:bg-muted rounded-md" onClick={() => setMobileMenuOpen(false)}>
+            How it Works
+          </Link>
+          <Link href="/pricing" className="block px-4 py-2 hover:bg-muted rounded-md" onClick={() => setMobileMenuOpen(false)}>
+            Pricing
+          </Link>
           <Link href="/collab" className="block px-4 py-2 hover:bg-muted rounded-md" onClick={() => setMobileMenuOpen(false)}>
             Collab
           </Link>
@@ -180,7 +231,7 @@ const Navbar = () => {
               >
                 Dashboard
               </Link>
-              <Button variant="ghost" className="w-full" onClick={() => { logout(); setMobileMenuOpen(false); }}>
+              <Button variant="ghost" className="w-full" onClick={handleLogout}>
                 Logout
               </Button>
             </>
@@ -200,6 +251,9 @@ const Navbar = () => {
             </CommandItem>
             <CommandItem onSelect={() => handleCommandSelect('collab')}>
               <span>Community Collab</span>
+            </CommandItem>
+            <CommandItem onSelect={() => handleCommandSelect('pricing')}>
+              <span>Pricing & Upgrades</span>
             </CommandItem>
             {isAuthenticated && (
               <CommandItem onSelect={() => handleCommandSelect('dashboard')}>

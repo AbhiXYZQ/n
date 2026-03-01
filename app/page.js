@@ -27,16 +27,31 @@ const LandingPage = () => {
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                0% Commission.
+                Hire Developers Directly.
               </span>
               <br />
-              <span>100% Direct Connection.</span>
+              <span>Or Find Dev Work Fast.</span>
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              The revolutionary freelancing platform built exclusively for developers. 
-              Keep every dollar you earn. Connect directly with clients.
+              Nainix is a freelancing platform where clients post projects, freelancers send proposals,
+              and both connect directly without commission cuts.
             </p>
+
+            <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-3 text-left sm:grid-cols-3">
+              {[
+                '1. Client posts a project',
+                '2. Freelancers submit proposals',
+                '3. You connect and start directly'
+              ].map((item) => (
+                <div key={item} className="rounded-lg border bg-card px-4 py-3 text-sm text-foreground">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>{item}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="text-lg px-8">
@@ -46,7 +61,7 @@ const LandingPage = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                <Link href="/register">Join as Freelancer</Link>
+                <Link href="/register">Post a Project</Link>
               </Button>
             </div>
           </motion.div>
@@ -78,7 +93,7 @@ const LandingPage = () => {
               Why Developers Choose Nainix
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Built by developers, for developers. No middleman, no hidden fees.
+              A simple workflow for both sides: post work, apply to work, connect directly.
             </p>
           </div>
 
@@ -129,7 +144,7 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="container py-24">
+      <section id="how-it-works" className="container py-24 scroll-mt-24">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -139,16 +154,19 @@ const LandingPage = () => {
         >
           <div className="text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold">
-              Get Started in Minutes
+              How Nainix Works
             </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Clear flow for every new visitor, whether you are hiring or freelancing.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: '01', title: 'Sign Up', desc: 'Choose Client or Freelancer' },
-              { step: '02', title: 'Create Profile', desc: 'Showcase your skills & portfolio' },
-              { step: '03', title: 'Browse Jobs', desc: 'Find projects that match your expertise' },
-              { step: '04', title: 'Connect & Build', desc: 'Work directly with clients, zero fees' }
+              { step: '01', title: 'Sign Up', desc: 'Join as Client to hire or Freelancer to work.' },
+              { step: '02', title: 'Post or Apply', desc: 'Clients post projects and freelancers send proposals.' },
+              { step: '03', title: 'Review Match', desc: 'Compare profiles, pricing, and smart match scores.' },
+              { step: '04', title: 'Connect Directly', desc: 'Finalize details and start work with 0% commission.' }
             ].map((item, idx) => (
               <div key={idx} className="relative space-y-3">
                 <div className="text-5xl font-bold text-primary/20">{item.step}</div>
@@ -159,6 +177,59 @@ const LandingPage = () => {
                 )}
               </div>
             ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Revenue Features */}
+      <section className="container py-24">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="space-y-10"
+        >
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Scale Faster with Premium Features
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Transparent upgrades built for growth without commission cuts.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              {
+                title: 'Featured Jobs',
+                desc: 'Boost your job visibility for 24-72 hours and get faster high-quality proposals.'
+              },
+              {
+                title: 'Verification Badge',
+                desc: 'Increase trust with a verified profile badge for better response rates.'
+              },
+              {
+                title: 'AI Pro Plan',
+                desc: 'Use AI proposal enhancement and premium matching tools to win more work.'
+              }
+            ].map((item) => (
+              <Card key={item.title} className="border">
+                <CardContent className="p-6 space-y-3">
+                  <h3 className="text-xl font-semibold">{item.title}</h3>
+                  <p className="text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="flex justify-center">
+            <Button size="lg" asChild>
+              <Link href="/pricing">
+                View Pricing Plans
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </motion.div>
       </section>
