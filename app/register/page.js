@@ -713,7 +713,25 @@ const RegisterPage = () => {
                       required
                     />
                     <Label htmlFor="acceptTerms" className="text-sm font-normal leading-5">
-                      I agree to the Terms of Service and Privacy Policy, and confirm my details are correct.
+                      I agree to the{' '}
+                      <Link
+                        href="/legal/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Terms of Service
+                      </Link>
+                      {' '}and{' '}
+                      <Link
+                        href="/legal/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Privacy Policy
+                      </Link>
+                      , and confirm my details are correct.
                     </Label>
                   </div>
                 </div>

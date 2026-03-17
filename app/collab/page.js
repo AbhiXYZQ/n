@@ -1,35 +1,365 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Users } from 'lucide-react'; // ✅ FIX: Unused 'Clock' removed
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Users, CheckCircle2, HandshakeIcon, MessageSquare, Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { mockCollabRooms, mockUsers } from '@/lib/db/schema';
 import useAuthStore from '@/lib/store/authStore';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link'; // ✅ FIX: Added Link for Next.js routing
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+// ─────────────────────────────────────────────────────────────
+// Express Interest Modal — fully self-contained component
+// ─────────────────────────────────────────────────────────────
+const InterestModal = ({ collab, creator, open, onOpenChange, onSuccess }) => {
+  const { user } = useAuthStore();
+  const [interestForm, setInterestForm] = useState({
+    message: '',
+    skills: '',
+    contactEmail: user?.email || '',
+    contactWhatsApp: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!interestForm.message.trim() || interestForm.message.trim().length < 20) {
+      toast.error('Please write at least 20 characters in your message.');
+      return;
+    }
+
+    if (!interestForm.skills.trim()) {
+      toast.error('Please mention your relevant skills.');
+      return;
+    }
+
+    if (!interestForm.contactEmail.trim() && !interestForm.contactWhatsApp.trim()) {
+      toast.error('Please provide at least one contact method (email or WhatsApp).');
+      return;
+    }
+
+    setSubmitting(true);
+
+    // Simulate API call (replace with real API when backend is ready)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    setSubmitting(false);
+    onOpenChange(false);
+    onSuccess(collab.id);
+
+    toast.success(`Interest sent to ${creator?.name}! They'll reach out soon.`, {
+      description: 'Your message and contact details have been shared.',
+      duration: 5000,
+    });
+
+    // Reset form
+    setInterestForm({
+      message: '',
+      skills: '',
+      contactEmail: user?.email || '',
+      contactWhatsApp: '',
+    });
+  };
+
+  const charCount = interestForm.message.length;
+  const charLimit = 500;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <HandshakeIcon className="h-5 w-5 text-primary" />
+            Express Your Interest
+          </DialogTitle>
+          <DialogDescription>
+            Send a message to <strong>{creator?.name}</strong> for the collab&nbsp;
+            <strong>"{collab?.title}"</strong>
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Creator Info Banner */}
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/40 px-4 py-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={creator?.avatarUrl} />
+            <AvatarFallback>{creator?.name?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-semibold">{creator?.name}</p>
+            <p className="text-xs text-muted-foreground">Looking for: <Badge variant="secondary" className="text-xs ml-1">{collab?.requiredRole}</Badge></p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Message */}
+          <div className="space-y-2">
+            <Label htmlFor="interest-message">
+              Your Message
+              <span className="text-muted-foreground text-xs ml-2">({charCount}/{charLimit})</span>
+            </Label>
+            <Textarea
+              id="interest-message"
+              placeholder={`Hi ${creator?.name}, I'm interested in collaborating! I can help with the ${collab?.requiredRole} role because...`}
+              rows={4}
+              maxLength={charLimit}
+              value={interestForm.message}
+              onChange={(e) => setInterestForm({ ...interestForm, message: e.target.value })}
+              required
+              className={charCount >= charLimit ? 'border-destructive' : ''}
+            />
+            {charCount < 20 && charCount > 0 && (
+              <p className="text-xs text-destructive">
+                At least 20 characters required ({20 - charCount} more needed)
+              </p>
+            )}
+          </div>
+
+          {/* Relevant Skills */}
+          <div className="space-y-2">
+            <Label htmlFor="interest-skills">Your Relevant Skills</Label>
+            <Input
+              id="interest-skills"
+              placeholder="e.g., Figma, React, After Effects"
+              value={interestForm.skills}
+              onChange={(e) => setInterestForm({ ...interestForm, skills: e.target.value })}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Mention skills relevant to the role they need
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Contact Methods */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-1">
+              <MessageSquare className="h-4 w-4" />
+              How can they contact you? (at least one required)
+            </Label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="interest-email" className="text-xs text-muted-foreground">
+                  Email
+                </Label>
+                <Input
+                  id="interest-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={interestForm.contactEmail}
+                  onChange={(e) => setInterestForm({ ...interestForm, contactEmail: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="interest-whatsapp" className="text-xs text-muted-foreground">
+                  WhatsApp Number
+                </Label>
+                <Input
+                  id="interest-whatsapp"
+                  placeholder="+91 9876543210"
+                  value={interestForm.contactWhatsApp}
+                  onChange={(e) => setInterestForm({ ...interestForm, contactWhatsApp: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Interest
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// Single Collab Card — handles all button states
+// ─────────────────────────────────────────────────────────────
+const CollabCard = ({ collab, creator, user, isAuthenticated, onExpressInterest, alreadySent }) => {
+  const [interestModalOpen, setInterestModalOpen] = useState(false);
+  const router = useRouter();
+  const isOwnCollab = user?.id === collab.creatorId;
+
+  const handleExpressInterestClick = () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to express interest', {
+        description: 'Create a free account or login to connect with collaborators.',
+        action: {
+          label: 'Login',
+          onClick: () => router.push('/login'),
+        },
+      });
+      return;
+    }
+
+    if (isOwnCollab) {
+      toast.info("This is your own collab post — you can't express interest in it.");
+      return;
+    }
+
+    setInterestModalOpen(true);
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className={`hover:shadow-lg transition-all duration-200 ${alreadySent ? 'border-primary/30' : ''}`}>
+          <CardHeader>
+            <div className="flex items-start gap-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={creator?.avatarUrl} />
+                <AvatarFallback>{creator?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <CardTitle className="text-xl">{collab.title}</CardTitle>
+                  <Badge variant="secondary">{collab.requiredRole}</Badge>
+                  {isOwnCollab && (
+                    <Badge variant="outline" className="text-xs">Your Post</Badge>
+                  )}
+                </div>
+                <CardDescription>
+                  Posted by{' '}
+                  <Link
+                    href={`/${creator?.username}`}
+                    className="hover:text-primary transition-colors hover:underline"
+                  >
+                    {creator?.name}
+                  </Link>{' '}
+                  • {new Date(collab.createdAt).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <p className="text-base mb-5 leading-relaxed">{collab.description}</p>
+
+            {/* Interest Sent State Banner */}
+            <AnimatePresence>
+              {alreadySent && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-4 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 flex items-center gap-2 text-sm text-primary"
+                >
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <span>Your interest has been sent! {creator?.name} will contact you soon.</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Express Interest Button */}
+              {alreadySent ? (
+                <Button variant="secondary" disabled className="gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Interest Sent
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleExpressInterestClick}
+                  className="gap-2"
+                  disabled={isOwnCollab}
+                >
+                  <HandshakeIcon className="h-4 w-4" />
+                  {isOwnCollab ? 'Your Post' : 'Express Interest'}
+                </Button>
+              )}
+
+              {/* View Profile Button */}
+              {creator?.username && (
+                <Button variant="outline" asChild>
+                  <Link href={`/${creator.username}`}>View Profile</Link>
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Express Interest Modal */}
+      <InterestModal
+        collab={collab}
+        creator={creator}
+        open={interestModalOpen}
+        onOpenChange={setInterestModalOpen}
+        onSuccess={onExpressInterest}
+      />
+    </>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// Main Collab Page
+// ─────────────────────────────────────────────────────────────
 const CollabPage = () => {
   const { user, isAuthenticated } = useAuthStore();
   const [collabRooms, setCollabRooms] = useState(mockCollabRooms);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  // Track which collab IDs the current user has expressed interest in
+  const [expressedInterestIds, setExpressedInterestIds] = useState(new Set());
   const [formData, setFormData] = useState({
     title: '',
     requiredRole: '',
-    description: ''
+    description: '',
   });
+
+  const getCreator = (creatorId) => mockUsers.find((u) => u.id === creatorId);
 
   const handleCreateCollab = (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       toast.error('Please login to create a collab post');
       return;
@@ -39,17 +369,18 @@ const CollabPage = () => {
       id: uuidv4(),
       creatorId: user.id,
       ...formData,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     setCollabRooms([newCollab, ...collabRooms]);
-    toast.success('Collab post created!');
+    toast.success('Collab post created! Others can now express interest.');
     setCreateDialogOpen(false);
     setFormData({ title: '', requiredRole: '', description: '' });
   };
 
-  const getCreator = (creatorId) => {
-    return mockUsers.find(u => u.id === creatorId);
+  // Called when interest is successfully submitted from InterestModal
+  const handleInterestSuccess = (collabId) => {
+    setExpressedInterestIds((prev) => new Set([...prev, collabId]));
   };
 
   return (
@@ -61,16 +392,18 @@ const CollabPage = () => {
         className="space-y-8"
       >
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Community Collab</h1>
             <p className="text-muted-foreground mt-1">
               Partner with other freelancers to tackle bigger projects
             </p>
           </div>
+
+          {/* Create Collab Dialog */}
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="lg">
+              <Button size="lg" className="w-full sm:w-auto">
                 <Plus className="mr-2 h-5 w-5" />
                 Create Collab
               </Button>
@@ -84,9 +417,9 @@ const CollabPage = () => {
               </DialogHeader>
               <form onSubmit={handleCreateCollab} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="collab-title">Title</Label>
                   <Input
-                    id="title"
+                    id="collab-title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Looking for UI Designer - Split Revenue 50/50"
@@ -94,9 +427,9 @@ const CollabPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Required Role</Label>
+                  <Label htmlFor="collab-role">Required Role</Label>
                   <Input
-                    id="role"
+                    id="collab-role"
                     value={formData.requiredRole}
                     onChange={(e) => setFormData({ ...formData, requiredRole: e.target.value })}
                     placeholder="e.g., Designer, Backend Developer"
@@ -104,9 +437,9 @@ const CollabPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="collab-description">Description</Label>
                   <Textarea
-                    id="description"
+                    id="collab-description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Describe the project and collaboration terms..."
@@ -118,16 +451,14 @@ const CollabPage = () => {
                   <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">
-                    Create Post
-                  </Button>
+                  <Button type="submit">Create Post</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Info Cards */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -143,65 +474,48 @@ const CollabPage = () => {
               <CardTitle className="text-sm">Why Collab?</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Team up with other freelancers to take on larger projects. Split the work, share the revenue, and build something amazing together.
+              Team up with other freelancers to take on larger projects. Split the work, share the
+              revenue, and build something amazing together.
             </CardContent>
           </Card>
         </div>
 
         {/* Collab Feed */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Available Collabs</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Available Collabs</h2>
+            {expressedInterestIds.size > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                {expressedInterestIds.size} interest{expressedInterestIds.size > 1 ? 's' : ''} sent
+              </Badge>
+            )}
+          </div>
+
           {collabRooms.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center">
+              <CardContent className="py-12 text-center space-y-3">
+                <HandshakeIcon className="h-10 w-10 text-muted-foreground mx-auto" />
                 <p className="text-muted-foreground">No collab posts yet. Be the first to create one!</p>
+                <Button onClick={() => setCreateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Collab
+                </Button>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-6">
-              {collabRooms.map((collab) => {
-                const creator = getCreator(collab.creatorId);
-                return (
-                  <motion.div
-                    key={collab.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={creator?.avatarUrl} />
-                            <AvatarFallback>{creator?.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <CardTitle className="text-xl">{collab.title}</CardTitle>
-                              <Badge variant="secondary">{collab.requiredRole}</Badge>
-                            </div>
-                            <CardDescription>
-                              Posted by {creator?.name} • {new Date(collab.createdAt).toLocaleDateString()}
-                            </CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-base mb-4">{collab.description}</p>
-                        <div className="flex items-center gap-3">
-                          <Button>
-                            Express Interest
-                          </Button>
-                          {/* ✅ FIX: Replaced <a> tag with Next.js Link component */}
-                          <Button variant="outline" asChild>
-                            <Link href={`/${creator?.username}`}>View Profile</Link>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
+              {collabRooms.map((collab) => (
+                <CollabCard
+                  key={collab.id}
+                  collab={collab}
+                  creator={getCreator(collab.creatorId)}
+                  user={user}
+                  isAuthenticated={isAuthenticated}
+                  alreadySent={expressedInterestIds.has(collab.id)}
+                  onExpressInterest={handleInterestSuccess}
+                />
+              ))}
             </div>
           )}
         </div>
