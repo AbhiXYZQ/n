@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { getDatabase } from '@/lib/db/mongodb';
+import { sendPasswordResetEmail } from '@/lib/email/resend';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
+const isDev = process.env.NODE_ENV !== 'production';
+const hasResend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_YOUR_API_KEY_HERE';
 
 export async function POST(request) {
   try {
@@ -20,14 +23,13 @@ export async function POST(request) {
     const usersCollection = db.collection('users');
     const tokensCollection = db.collection('passwordResetTokens');
 
-    // Always respond the same way — don't reveal if email exists (security)
     const user = await usersCollection.findOne({ email });
 
     if (user) {
       // Delete any previous tokens for this user
       await tokensCollection.deleteMany({ userId: user.id });
 
-      // Create a new secure token (32 random bytes = 64 hex chars)
+      // Generate a secure token
       const token = randomBytes(32).toString('hex');
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
@@ -39,27 +41,41 @@ export async function POST(request) {
         createdAt: new Date(),
       });
 
-      // ── In production: send an email here with the reset link ──
-      // e.g. via Resend, SendGrid, or Nodemailer.
-      // Reset link format: /reset-password?token=<token>
-      //
-      // For now (dev mode): return the token directly so it can be tested
-      // without an email service.
+      // ── Send email if Resend is configured ──────────────
+      if (hasResend) {
+        try {
+          await sendPasswordResetEmail({
+            to: user.email,
+            name: user.name,
+            token,
+          });
+        } catch (emailError) {
+          console.error('[Resend] Email send failed:', emailError?.message);
+          // Don't block the response if email fails; token is already saved
+        }
+      }
 
-      const isDev = process.env.NODE_ENV !== 'production';
-      return NextResponse.json({
-        success: true,
-        message: 'If an account exists with this email, you will receive reset instructions.',
-        ...(isDev && { devToken: token, resetLink: `/reset-password?token=${token}` }),
-      });
+      // ── Dev mode: return token in response for direct testing ──
+      if (isDev) {
+        const resetLink = `/reset-password?token=${token}`;
+        return NextResponse.json({
+          success: true,
+          message: hasResend
+            ? `Password reset email sent to ${email}. Check your inbox.`
+            : 'Dev mode: use the resetLink below (no email service configured).',
+          ...(isDev && { devToken: token, resetLink }),
+        });
+      }
     }
 
-    // User not found — same response for security
+    // Always return the same response in production (security: don't reveal if email exists)
     return NextResponse.json({
       success: true,
-      message: 'If an account exists with this email, you will receive reset instructions.',
+      message: 'If an account exists with this email, you will receive reset instructions shortly.',
     });
+
   } catch (error) {
+    console.error('[ForgotPassword]', error);
     return NextResponse.json(
       { success: false, message: 'Something went wrong. Please try again.' },
       { status: 500 }

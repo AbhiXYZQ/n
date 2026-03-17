@@ -3,6 +3,9 @@ import { randomBytes, scryptSync } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { getDatabase } from '@/lib/db/mongodb';
 import { createSessionPayload, setSessionCookie } from '@/lib/auth/session';
+import { sendWelcomeEmail } from '@/lib/email/resend';
+
+const hasResend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_YOUR_API_KEY_HERE';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 const normalizeUsername = (username = '') => username.trim().toLowerCase();
@@ -216,6 +219,12 @@ export async function POST(request) {
     };
 
     await usersCollection.insertOne(newUser);
+
+    // Send welcome email (fire-and-forget — don't block response)
+    if (hasResend) {
+      sendWelcomeEmail({ to: newUser.email, name: newUser.name, username: newUser.username })
+        .catch((err) => console.error('[Resend] Welcome email failed:', err?.message));
+    }
 
     const safeUser = toSafeUser(newUser);
     const response = NextResponse.json({
