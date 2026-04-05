@@ -52,8 +52,18 @@ const LoginPage = () => {
   };
 
   const handleSocialLogin = (provider) => {
-    toast.info(`${provider} login will be connected soon!`);
-    // Yahan hum baad mein Clerk ya NextAuth ka logic lagayenge
+    // Map UI provider names to Supabase provider IDs
+    const providerMap = {
+      'Google': 'google',
+      'Apple': 'apple',
+      'GitHub': 'github',
+      'LinkedIn': 'linkedin_oidc',
+    };
+    
+    const mappedProvider = providerMap[provider];
+    if (mappedProvider) {
+      window.location.href = `/api/auth/oauth?provider=${mappedProvider}`;
+    }
   };
 
   return (

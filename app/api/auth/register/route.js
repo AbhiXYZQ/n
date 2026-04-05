@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { randomBytes, scryptSync } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { getSupabase } from '@/lib/db/supabase';
@@ -57,6 +58,23 @@ function toSafeUser(user) {
 
 export async function POST(request) {
   try {
+    const cookieStore = cookies();
+    const oauthPending = cookieStore.get('oauth_pending');
+    let isOAuth = false;
+    let oauthAvatar = null;
+    let oauthEmailVerified = false;
+    
+    if (oauthPending) {
+      isOAuth = true;
+      try {
+        const payload = JSON.parse(Buffer.from(oauthPending.value, 'base64').toString('utf-8'));
+        oauthAvatar = payload.avatar_url;
+        oauthEmailVerified = payload.verified;
+      } catch (e) {
+        console.error('[OAuth Parse Error]', e);
+      }
+    }
+
     const body        = await request.json();
     const name        = body?.name?.trim();
     const email       = normalizeEmail(body?.email);
@@ -73,12 +91,12 @@ export async function POST(request) {
     const acceptTerms = !!body?.acceptTerms;
     const roleDetails = body?.roleDetails || {};
 
-    if (!name || !email || !username || !password || !role || !phone || !country || !state || !city || !bio) {
+    if (!name || !email || !username || (!isOAuth && !password) || !role || !phone || !country || !state || !city || !bio) {
       return NextResponse.json({ success: false, message: 'All fields are required.' }, { status: 400 });
     }
     if (!isValidEmail(email))     return NextResponse.json({ success: false, message: 'Please enter a valid email address.' }, { status: 400 });
     if (!isValidPhone(phone))     return NextResponse.json({ success: false, message: 'Please enter a valid phone number in international format.' }, { status: 400 });
-    if (password.length < 6)      return NextResponse.json({ success: false, message: 'Password must be at least 6 characters.' }, { status: 400 });
+    if (!isOAuth && password.length < 6)      return NextResponse.json({ success: false, message: 'Password must be at least 6 characters.' }, { status: 400 });
     if (!['CLIENT', 'FREELANCER'].includes(role)) return NextResponse.json({ success: false, message: 'Invalid role selected.' }, { status: 400 });
     if (bio.length < 30)          return NextResponse.json({ success: false, message: 'Bio must be at least 30 characters.' }, { status: 400 });
     if (!acceptTerms)             return NextResponse.json({ success: false, message: 'You must accept terms and privacy policy.' }, { status: 400 });
@@ -134,7 +152,13 @@ export async function POST(request) {
     const { data: byPhone } = await supabase.from('users').select('id').eq('phone', phone).maybeSingle();
     if (byPhone) return NextResponse.json({ success: false, message: 'Phone number is already registered.' }, { status: 409 });
 
-    const { hash, salt } = hashPassword(password);
+    let hash = null;
+    let salt = null;
+    if (!isOAuth) {
+      const p = hashPassword(password);
+      hash = p.hash;
+      salt = p.salt;
+    }
     const now = new Date().toISOString();
     const id  = uuidv4();
 
@@ -151,13 +175,13 @@ export async function POST(request) {
       city,
       verified_badges : [],
       social_links    : { ...(linkedin ? { linkedin } : {}), ...(github ? { github } : {}) },
-      avatar_url      : `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
+      avatar_url      : oauthAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
       skills          : role === 'FREELANCER' ? freelancerRoleDetails.skills : [],
       portfolio       : [],
       video_intro     : null,
       role_profile    : role === 'FREELANCER' ? freelancerRoleDetails : clientRoleDetails,
       onboarding      : { profileVersion: 'premium-v1', termsAcceptedAt: now, completedAt: now },
-      contact_verification: { emailVerified: false, phoneVerified: false, emailVerifiedAt: null, phoneVerifiedAt: null },
+      contact_verification: { emailVerified: Boolean(oauthEmailVerified), phoneVerified: false, emailVerifiedAt: oauthEmailVerified ? now : null, phoneVerifiedAt: null },
       monetization    : { plan: 'FREE', verificationBadgeActive: false, aiProActive: false, aiProActivatedAt: null },
       password_hash   : hash,
       password_salt   : salt,
@@ -181,6 +205,9 @@ export async function POST(request) {
     const safeUser = toSafeUser(newUser);
     const response = NextResponse.json({ success: true, user: safeUser });
     setSessionCookie(response, createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email }));
+    if (isOAuth) {
+      response.cookies.delete('oauth_pending');
+    }
     return response;
   } catch (error) {
     console.error('[Register]', error);

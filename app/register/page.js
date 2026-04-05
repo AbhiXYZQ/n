@@ -107,6 +107,19 @@ const RegisterPage = () => {
 
   const [liveChecks, setLiveChecks] = useState(initialLiveChecks);
   const [loading, setLoading] = useState(false);
+  const [isOAuth, setIsOAuth] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('oauth') === 'true') {
+      setIsOAuth(true);
+      setFormData((prev) => ({
+        ...prev,
+        name: params.get('name') || prev.name,
+        email: params.get('email') || prev.email,
+      }));
+    }
+  }, []);
 
   const totalSteps = 4;
 
@@ -301,7 +314,7 @@ const RegisterPage = () => {
       acceptTerms: formData.acceptTerms,
     };
 
-    if (!trimmedData.name || !trimmedData.email || !trimmedData.username || !trimmedData.password || !trimmedData.phone || !trimmedData.country || !trimmedData.state || !trimmedData.city) {
+    if (!trimmedData.name || !trimmedData.email || !trimmedData.username || (!isOAuth && !trimmedData.password) || !trimmedData.phone || !trimmedData.country || !trimmedData.state || !trimmedData.city) {
       toast.error('Please fill all required fields.');
       setLoading(false);
       return;
@@ -313,7 +326,7 @@ const RegisterPage = () => {
       return;
     }
 
-    if (trimmedData.password.length < 6) {
+    if (!isOAuth && trimmedData.password.length < 6) {
       toast.error('Password must be at least 6 characters.');
       setLoading(false);
       return;
@@ -405,11 +418,11 @@ const RegisterPage = () => {
 
   const validateStep = (step, showToast = true) => {
     if (step === 1) {
-      if (!formData.name.trim() || !formData.username.trim() || !formData.email.trim() || !formData.password) {
-        if (showToast) toast.error('Step 1: Fill name, username, email and password.');
+      if (!formData.name.trim() || !formData.username.trim() || !formData.email.trim() || (!isOAuth && !formData.password)) {
+        if (showToast) toast.error('Step 1: Fill name, username, email' + (isOAuth ? '.' : ' and password.'));
         return false;
       }
-      if (formData.password.length < 6) {
+      if (!isOAuth && formData.password.length < 6) {
         if (showToast) toast.error('Step 1: Password must be at least 6 characters.');
         return false;
       }
@@ -519,7 +532,7 @@ const RegisterPage = () => {
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
-                      <Input id="name" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} required />
+                      <Input id="name" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} required disabled={isOAuth} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="username">Username</Label>
@@ -533,15 +546,17 @@ const RegisterPage = () => {
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleChange} required />
+                      <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleChange} required disabled={isOAuth} />
                       {liveChecks.email.status !== LIVE_STATUS.IDLE && (
                         <p className={statusTextClass(liveChecks.email.status)}>{liveChecks.email.message}</p>
                       )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input id="password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required />
-                    </div>
+                    {!isOAuth && (
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input id="password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
