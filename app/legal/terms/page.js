@@ -21,10 +21,10 @@ const TermsOfService = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">2. The 0% Commission Model & Platform Role</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">2. The Tiered Commission Model & Platform Role</h2>
             <p>
-              Nainix is a <strong>0% commission platform</strong>. Our core service is simply connecting clients with freelance developers and designers. 
-              <strong> We do not process project payments, hold escrow, or mediate disputes.</strong> All financial transactions and project agreements are strictly direct between the Client and the Freelancer.
+              Nainix operates on a <strong>tiered commission model</strong> (ranging from 10% to 1% depending on your chosen plan). Our core service is connecting clients with tech talent. 
+              <strong> We do not hold escrow or mediate payment disputes between parties.</strong> Users are responsible for their own financial transactions and agreements.
             </p>
           </section>
 

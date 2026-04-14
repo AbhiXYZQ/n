@@ -14,8 +14,8 @@ const LandingPage = () => {
       <div className="w-full bg-gradient-to-r from-primary via-accent to-primary p-0.5 text-center group cursor-pointer relative overflow-hidden transition-all hover:brightness-110">
         <Link href="/founders" className="flex items-center justify-center gap-2 text-sm font-medium text-white px-4 py-2 relative z-10 w-full h-full">
            <Zap className="h-4 w-4 animate-pulse" />
-           <span><strong className="underline underline-offset-2 decoration-white/60">Launch Offer:</strong> Lifetime 0% Commission & Founding Member Batch for Early Freelancers. </span>
-           <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs hidden sm:inline-block border border-white/20">Learn More</span>
+           <span><strong className="underline underline-offset-2 decoration-white/60">Legacy Offer:</strong> Free 0% Commission for the First 100 Founding Members. </span>
+           <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs hidden sm:inline-block border border-white/20">Claim Spot</span>
            <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
@@ -32,7 +32,7 @@ const LandingPage = () => {
           >
             <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm bg-card">
               <Zap className="mr-2 h-4 w-4 text-primary" fill="currentColor" />
-              <span>0% Commission Forever</span>
+              <span>Commission as low as 1%</span>
             </div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
@@ -114,10 +114,10 @@ const LandingPage = () => {
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Zap className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">0% Commission</h3>
+                <h3 className="text-xl font-semibold">Lower Commissions</h3>
                 <p className="text-muted-foreground">
-                  Keep 100% of what you earn. No platform fees, no hidden charges. 
-                  Your work, your money.
+                  Keep more of what you earn. Choose plans that reduce platform fees from 10% down to just 1%. 
+                  Fair pricing for fair work.
                 </p>
               </CardContent>
             </Card>
@@ -176,7 +176,7 @@ const LandingPage = () => {
               { step: '01', title: 'Sign Up', desc: 'Join as Client to hire or Freelancer to work.' },
               { step: '02', title: 'Post or Apply', desc: 'Clients post projects and freelancers send proposals.' },
               { step: '03', title: 'Review Match', desc: 'Compare profiles, pricing, and smart match scores.' },
-              { step: '04', title: 'Connect Directly', desc: 'Finalize details and start work with 0% commission.' }
+              { step: '04', title: 'Connect Directly', desc: 'Finalize details and start work with unbeatable commission rates.' }
             ].map((item, idx) => (
               <div key={idx} className="relative space-y-3">
                 <div className="text-5xl font-bold text-primary/20">{item.step}</div>
@@ -191,8 +191,51 @@ const LandingPage = () => {
         </motion.div>
       </section>
 
-      {/* Revenue Features */}
-      <section className="container py-24">
+      {/* Pricing Tiers Section */}
+      <section id="pricing" className="container py-24 scroll-mt-24">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="space-y-12"
+        >
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Simple Tiered Commission</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Upgrade to keep more of your revenue. No hidden platform taxes.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              { title: 'FREE', fee: '10%', desc: 'Basic direct hiring', accent: 'border-border' },
+              { title: 'Featured Boost', fee: '8%', desc: 'Visibility boost', accent: 'border-primary/30' },
+              { title: 'Verified Badge', fee: '4%', desc: 'Trusted status', accent: 'border-accent/30' },
+              { title: 'AI Pro Plan', fee: '1%', desc: 'Ultimate tools', accent: 'border-primary shadow-lg shadow-primary/20 scale-105 bg-primary/5' }
+            ].map((plan) => (
+              <Card key={plan.title} className={`relative flex flex-col justify-between ${plan.accent} transition-transform hover:scale-[1.02]`}>
+                <CardContent className="p-8 space-y-4">
+                  <h3 className="font-bold text-muted-foreground uppercase tracking-widest text-xs">{plan.title}</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">{plan.fee}</span>
+                    <span className="text-muted-foreground font-medium">fee</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {plan.desc}
+                  </p>
+                  <Button variant={plan.title === 'AI Pro Plan' ? 'default' : 'outline'} className="w-full mt-4" asChild>
+                    <Link href="/register">Get Started</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Revenue Features Explanation */}
+      <section className="container py-24 bg-card/50 border-y">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -202,44 +245,35 @@ const LandingPage = () => {
         >
           <div className="text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold">
-              Scale Faster with Premium Features
+              Scale Faster with Premium Plans
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Transparent upgrades built for growth without commission cuts.
+              Unlock powerful tools and lower commission rates simultaneously.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
               {
-                title: 'Featured Jobs',
-                desc: 'Boost your job visibility for 24-72 hours and get faster high-quality proposals.'
+                title: 'Featured Jobs Boost',
+                desc: '8% Commission. Boost your job visibility for 24-72 hours and get faster premium proposals.'
               },
               {
                 title: 'Verification Badge',
-                desc: 'Increase trust with a verified profile badge for better response rates.'
+                desc: '4% Commission. Increase trust with a verified profile badge for 2x better response rates.'
               },
               {
                 title: 'AI Pro Plan',
-                desc: 'Use AI proposal enhancement and premium matching tools to win more work.'
+                desc: '1% Commission. Use AI proposal enhancement and premium matching tools to win more work.'
               }
             ].map((item) => (
-              <Card key={item.title} className="border">
+              <Card key={item.title} className="border bg-background">
                 <CardContent className="p-6 space-y-3">
                   <h3 className="text-xl font-semibold">{item.title}</h3>
                   <p className="text-muted-foreground">{item.desc}</p>
                 </CardContent>
               </Card>
             ))}
-          </div>
-
-          <div className="flex justify-center">
-            <Button size="lg" asChild>
-              <Link href="/pricing">
-                View Pricing Plans
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
           </div>
         </motion.div>
       </section>

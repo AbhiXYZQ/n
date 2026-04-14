@@ -16,18 +16,18 @@ const RefundPolicy = () => {
           <section>
             <h2 className="text-2xl font-semibold mt-8 mb-4">1. Project Payments</h2>
             <p>
-              Nainix operates on a strict <strong>0% commission</strong> model. We act exclusively as a connection hub and <strong>do not process, hold, or manage any project-related payments</strong> between Clients and Freelancers. 
+              Nainix operates on a <strong>tiered commission model</strong>. While we provide the connection hub, we <strong>do not hold project-related payments in escrow</strong>. 
             </p>
             <p className="mt-2">
-              Therefore, Nainix cannot issue refunds for any freelance work, milestones, or projects. Any disputes regarding payments or refunds must be resolved directly between the Client and the Freelancer according to their mutual external agreements.
+              Therefore, Nainix cannot issue refunds for project work completed between Clients and Freelancers. Any disputes must be handled directly between the parties involved.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">2. Platform Support & "Tip Jar"</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">2. Platform Fees & Subscriptions</h2>
             <p>
-              To keep the platform free and 0% commission for everyone, Nainix accepts voluntary financial support via our "Tip Jar" or sponsorship links. 
-              Because these are voluntary contributions to support server and development costs, <strong>all tips and sponsorships are final and non-refundable</strong>.
+              Fees paid for premium plans (Featured Boost, Verification, or AI Pro) and platform commissions are used to maintain server infrastructure and development. 
+              <strong> All platform-related fees and subscription payments are final and non-refundable.</strong>
             </p>
           </section>
 

@@ -14,7 +14,7 @@ const Footer = () => {
               Nainix
             </h3>
             <p className="max-w-md text-sm text-muted-foreground">
-              Nainix helps clients hire developers and freelancers find projects with direct connection and 0% commission.
+              Nainix helps clients hire developers and freelancers find projects with direct connection and unbeatable commission models.
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border px-3 py-2 text-xs text-muted-foreground">0% Platform Fee</div>

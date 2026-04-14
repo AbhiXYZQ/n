@@ -93,7 +93,7 @@ export default function FoundersPage() {
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             The freelance industry is broken. Heavy commissions are eating into your hard work. It's time to fix it. 
             <br className="hidden md:block" />
-            <span className="text-foreground font-semibold"> Join the 0% commission revolution before the doors close.</span>
+            <span className="text-foreground font-semibold"> Join the commission revolution before the doors close.</span>
           </p>
         </motion.div>
       </section>
@@ -121,7 +121,7 @@ export default function FoundersPage() {
               As an AI & ML student spending late nights debugging code, I knew this wasn't fair. Technology should empower creators, not tax them.
             </p>
             <p>
-              That's exactly why I started building Nainix—a strictly <strong className="text-foreground font-bold">0% commission freelance marketplace</strong>. No hidden fees, no deductions. Just pure collaboration.
+              That's exactly why I started building Nainix—a platform with <strong className="text-foreground font-bold">unbeatable commission models</strong>. While most platforms tax you heavily, we are capping the platform fee as low as 1% for professional users. No hidden deductions. Just pure collaboration.
             </p>
             <p>
               Right now, I am opening the platform exclusively for the backbone of any tech ecosystem: The Developers and Freelancers. We are building the supply side first, and I want to reward the early believers who are joining me on this mission.
@@ -168,10 +168,10 @@ export default function FoundersPage() {
                 
                 <div className="space-y-4">
                   <h4 className="text-xl font-bold text-foreground flex items-center gap-2">
-                    <Zap className="h-6 w-6 text-amber-500" /> Lifetime Premium Access
+                    <Zap className="h-6 w-6 text-amber-500" /> Legacy 0% Commission
                   </h4>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    Zero subscription fees, priority job bidding, and top-tier visibility forever. You will never pay a dime to use the premium features of Nainix.
+                    As a reward for being in the first 100, you will keep **100% of your earnings** forever. Zero platform fees, zero subscriptions. You are the foundation of this platform.
                   </p>
                 </div>
               </CardContent>
@@ -198,10 +198,10 @@ export default function FoundersPage() {
                 
                 <div className="space-y-4">
                   <h4 className="text-xl font-bold text-foreground flex items-center gap-2">
-                    <Award className="h-6 w-6 text-primary" /> Digital Identity Badge
+                    <Award className="h-6 w-6 text-primary" /> Preferred Low Rates
                   </h4>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    An exclusive, verifiable holographic digital card on your dashboard. Clients will know you were here from day one. You represent the trusted foundation of Nainix.
+                    An exclusive, verifiable "Founding Member" badge. You'll gain access to our **1% commission tier** immediately, along with profile boosts to help you win high-ticket projects.
                   </p>
                 </div>
               </CardContent>

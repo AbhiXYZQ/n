@@ -5,10 +5,11 @@ import Footer from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
 import PremiumChatbot from '@/components/PremiumChatbot';
 import Preloader from '@/components/Preloader';
+import Script from 'next/script';
 
 export const metadata = {
-  title: 'Nainix - 0% Commission Freelancing Platform',
-  description: 'Nainix helps clients hire developers and freelancers find projects. Post jobs, send proposals, and connect directly with 0% commission.',
+  title: 'Nainix - Developer-First Freelance Marketplace',
+  description: 'Nainix helps clients hire developers and freelancers find projects. Post jobs, send proposals, and connect directly with unbeatable commission rates.',
   icons: {
     icon: '/logo_light.png',
   },

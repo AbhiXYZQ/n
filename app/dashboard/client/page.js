@@ -18,6 +18,7 @@ import { JobCategory, JobStatus, mockUsers } from '@/lib/db/schema';
 import { toast } from 'sonner';
 import Link from 'next/link'; // ✅ ADDED: Link import for routing
 import { trackEvent } from '@/lib/analytics';
+import { useRazorpay } from '@/hooks/useRazorpay';
 
 const ClientDashboard = () => {
   const { user, applyMonetizationFromServer } = useAuthStore();
@@ -45,6 +46,34 @@ const ClientDashboard = () => {
     e.preventDefault();
 
     try {
+      if (jobForm.isFeatured) {
+        // If featured is checked, we trigger Razorpay first
+        const amount = jobForm.featuredDays === '1' ? 399 : 799; // Different rates for 1 vs 3 days
+        processPayment({
+          amount,
+          feature: `FEATURED_JOB_PENDING`, // We'll handle this specially or just post the job if payment is okay
+          userId: user?.id,
+          userName: user?.name,
+          userEmail: user?.email,
+          onSuccess: async () => {
+             const newJob = await createJob({
+              title: jobForm.title,
+              description: jobForm.description,
+              category: jobForm.category,
+              budgetMin: parseInt(jobForm.budgetMin),
+              budgetMax: parseInt(jobForm.budgetMax),
+              isUrgent: jobForm.isUrgent,
+              requiredSkills: jobForm.requiredSkills.split(',').map(s => s.trim()),
+              isFeatured: true,
+              featuredDays: parseInt(jobForm.featuredDays)
+            });
+            toast.success('Job posted and featured successfully!');
+            setPostJobOpen(false);
+          }
+        });
+        return;
+      }
+
       const newJob = await createJob({
       title: jobForm.title,
       description: jobForm.description,
@@ -53,13 +82,13 @@ const ClientDashboard = () => {
       budgetMax: parseInt(jobForm.budgetMax),
       isUrgent: jobForm.isUrgent,
       requiredSkills: jobForm.requiredSkills.split(',').map(s => s.trim()),
-      isFeatured: jobForm.isFeatured,
-      featuredDays: parseInt(jobForm.featuredDays)
+      isFeatured: false,
+      featuredDays: 0
       });
 
       trackEvent('client_job_posted', {
         clientId: user?.id,
-        featured: !!newJob.isFeatured,
+        featured: false,
         urgent: !!newJob.isUrgent,
         category: newJob.category,
       });
@@ -81,72 +110,26 @@ const ClientDashboard = () => {
     }
   };
 
+  const { processPayment } = useRazorpay();
+
   const handleActivateVerification = async () => {
-    try {
-      const response = await fetch('/api/monetization/upgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: user?.id,
-          role: user?.role,
-          feature: 'VERIFICATION_BADGE'
-        })
-      });
-
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        toast.error(result.message || 'Unable to activate verification right now.');
-        return;
-      }
-
-      applyMonetizationFromServer({
-        monetization: result.monetization,
-        verifiedBadges: result.verifiedBadges
-      });
-
-      trackEvent('verification_upgraded', {
-        userId: user?.id,
-        role: user?.role,
-      });
-      toast.success('Verification badge activated.');
-    } catch (error) {
-      toast.error('Unable to activate verification right now.');
-    }
+    processPayment({
+      amount: 999,
+      feature: 'VERIFICATION_BADGE',
+      userId: user?.id,
+      userName: user?.name,
+      userEmail: user?.email
+    });
   };
 
   const handleFeatureBoost = async (jobId) => {
-    try {
-      const response = await fetch('/api/jobs/feature', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: user?.id,
-          role: user?.role,
-          jobId,
-          featuredDays: 3,
-        })
-      });
-
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        toast.error(result.message || 'Unable to boost job right now.');
-        return;
-      }
-
-      promoteJobToFeatured(jobId, result.featuredDays || 3);
-      trackEvent('job_featured_upgraded', {
-        userId: user?.id,
-        jobId,
-        featuredDays: result.featuredDays || 3,
-      });
-      toast.success('Job boosted as featured for 72 hours.');
-    } catch (error) {
-      toast.error('Unable to boost job right now.');
-    }
+    processPayment({
+      amount: 799,
+      feature: `FEATURED_JOB:${jobId}`,
+      userId: user?.id,
+      userName: user?.name,
+      userEmail: user?.email
+    });
   };
 
   const getProposalsForJob = (jobId) => {

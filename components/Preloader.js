@@ -76,7 +76,7 @@ export default function Preloader() {
               className="flex items-center gap-3"
             >
                <span className="text-[10px] tracking-[0.4em] text-white uppercase font-medium">
-                  Direct Hiring • 0% Commission
+                  Direct Hiring • Unbeatable Commission
                </span>
             </motion.div>
           </div>
