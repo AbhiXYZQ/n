@@ -25,84 +25,62 @@ import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
 
 // ─── Constants ──────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────
 const BUDGET_MIN_LIMIT = 0;
-const BUDGET_MAX_LIMIT = 25000;
 
 // Budget presets for quick selection
 const BUDGET_PRESETS = [
-  { label: 'Any', min: 0, max: 25000 },
+  { label: 'Any', min: 0, max: null },
   { label: 'Under ₹1k', min: 0, max: 1000 },
   { label: '₹1k–₹5k', min: 1000, max: 5000 },
   { label: '₹5k–₹10k', min: 5000, max: 10000 },
-  { label: '₹10k+', min: 10000, max: 25000 },
+  { label: '₹10k+', min: 10000, max: null },
 ];
 
 const POPULAR_SKILLS = ['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'MongoDB'];
 
 // ─── Budget Range Filter Component ──────────────────────────
 const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
-  // Local state so slider feels instant (parent updates on commit)
-  const [localMin, setLocalMin] = useState(budgetMin);
-  const [localMax, setLocalMax] = useState(budgetMax);
-  const [inputMin, setInputMin] = useState(String(budgetMin));
-  const [inputMax, setInputMax] = useState(String(budgetMax));
+  // Local state for inputs
+  const [inputMin, setInputMin] = useState(String(budgetMin || 0));
+  const [inputMax, setInputMax] = useState(budgetMax ? String(budgetMax) : '');
 
   // Sync if parent resets (e.g. Clear Filters)
   useEffect(() => {
-    setLocalMin(budgetMin);
-    setLocalMax(budgetMax);
-    setInputMin(String(budgetMin));
-    setInputMax(String(budgetMax));
+    setInputMin(String(budgetMin || 0));
+    setInputMax(budgetMax ? String(budgetMax) : '');
   }, [budgetMin, budgetMax]);
-
-  const minPercent = ((localMin - BUDGET_MIN_LIMIT) / (BUDGET_MAX_LIMIT - BUDGET_MIN_LIMIT)) * 100;
-  const maxPercent = ((localMax - BUDGET_MIN_LIMIT) / (BUDGET_MAX_LIMIT - BUDGET_MIN_LIMIT)) * 100;
 
   const commitChange = (min, max) => {
     onBudgetChange(min, max);
   };
 
-  const handleMinSlider = (e) => {
-    const val = Math.min(Number(e.target.value), localMax - 500);
-    setLocalMin(val);
-    setInputMin(String(val));
-    commitChange(val, localMax);
-  };
-
-  const handleMaxSlider = (e) => {
-    const val = Math.max(Number(e.target.value), localMin + 500);
-    setLocalMax(val);
-    setInputMax(String(val));
-    commitChange(localMin, val);
-  };
-
   const handleInputMinBlur = () => {
     const num = parseInt(inputMin, 10);
-    if (isNaN(num)) { setInputMin(String(localMin)); return; }
-    const clamped = Math.max(BUDGET_MIN_LIMIT, Math.min(num, localMax - 500));
-    setLocalMin(clamped);
+    if (isNaN(num)) { setInputMin(String(budgetMin || 0)); return; }
+    const clamped = Math.max(BUDGET_MIN_LIMIT, num);
     setInputMin(String(clamped));
-    commitChange(clamped, localMax);
+    commitChange(clamped, budgetMax);
   };
 
   const handleInputMaxBlur = () => {
+    // Empty string means no max limit
+    if (inputMax === '') {
+      commitChange(budgetMin, null);
+      return;
+    }
     const num = parseInt(inputMax, 10);
-    if (isNaN(num)) { setInputMax(String(localMax)); return; }
-    const clamped = Math.min(BUDGET_MAX_LIMIT, Math.max(num, localMin + 500));
-    setLocalMax(clamped);
+    if (isNaN(num)) { setInputMax(budgetMax ? String(budgetMax) : ''); return; }
+    const clamped = Math.max(budgetMin || 0, num);
     setInputMax(String(clamped));
-    commitChange(localMin, clamped);
+    commitChange(budgetMin || 0, clamped);
   };
 
   const applyPreset = (preset) => {
-    setLocalMin(preset.min);
-    setLocalMax(preset.max);
-    setInputMin(String(preset.min));
-    setInputMax(String(preset.max));
     commitChange(preset.min, preset.max);
   };
 
-  const isDefaultBudget = localMin === BUDGET_MIN_LIMIT && localMax === BUDGET_MAX_LIMIT;
+  const isDefaultBudget = !budgetMin && !budgetMax;
 
   return (
     <div className="space-y-4">
@@ -124,7 +102,7 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
       {/* Presets */}
       <div className="flex flex-wrap gap-1.5">
         {BUDGET_PRESETS.map((preset) => {
-          const isActive = localMin === preset.min && localMax === preset.max;
+          const isActive = budgetMin === preset.min && budgetMax === preset.max;
           return (
             <button
               key={preset.label}
@@ -141,50 +119,6 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
         })}
       </div>
 
-      {/* Dual Range Slider Track */}
-      <div className="px-3">
-        <div className="relative h-5 flex items-center">
-          {/* Grey track */}
-          <div className="absolute w-full h-1.5 bg-primary/20 rounded-full" />
-          {/* Coloured range between thumbs */}
-          <div
-            className="absolute h-1.5 bg-primary rounded-full"
-            style={{ left: `${minPercent}%`, width: `${maxPercent - minPercent}%` }}
-          />
-          {/* Min thumb */}
-          <input
-            type="range"
-            min={BUDGET_MIN_LIMIT}
-            max={BUDGET_MAX_LIMIT}
-            step={500}
-            value={localMin}
-            onChange={handleMinSlider}
-            className="absolute w-full h-5 opacity-0 cursor-pointer"
-            style={{ zIndex: localMin > BUDGET_MAX_LIMIT * 0.9 ? 5 : 3 }}
-          />
-          {/* Max thumb */}
-          <input
-            type="range"
-            min={BUDGET_MIN_LIMIT}
-            max={BUDGET_MAX_LIMIT}
-            step={500}
-            value={localMax}
-            onChange={handleMaxSlider}
-            className="absolute w-full h-5 opacity-0 cursor-pointer"
-            style={{ zIndex: 4 }}
-          />
-          {/* Visual thumb circles */}
-          <div
-            className="absolute h-4 w-4 rounded-full border-2 border-primary bg-background shadow-sm pointer-events-none z-10 -translate-x-1/2"
-            style={{ left: `${minPercent}%` }}
-          />
-          <div
-            className="absolute h-4 w-4 rounded-full border-2 border-primary bg-background shadow-sm pointer-events-none z-10 -translate-x-1/2"
-            style={{ left: `${maxPercent}%` }}
-          />
-        </div>
-      </div>
-
       {/* Min / Max text inputs */}
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
@@ -192,7 +126,6 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
           <Input
             type="number"
             min={BUDGET_MIN_LIMIT}
-            max={BUDGET_MAX_LIMIT}
             step={100}
             value={inputMin}
             onChange={(e) => setInputMin(e.target.value)}
@@ -204,9 +137,9 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
           <Label className="text-xs text-muted-foreground">Max (₹)</Label>
           <Input
             type="number"
-            min={BUDGET_MIN_LIMIT}
-            max={BUDGET_MAX_LIMIT}
+            min={budgetMin || 0}
             step={100}
+            placeholder="No Limit"
             value={inputMax}
             onChange={(e) => setInputMax(e.target.value)}
             onBlur={handleInputMaxBlur}
@@ -218,7 +151,7 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
       {/* Live preview label */}
       {!isDefaultBudget && (
         <p className="text-xs text-center text-primary font-medium">
-          ₹{fmtUSD(localMin)} — {localMax === BUDGET_MAX_LIMIT ? `₹${fmtUSD(localMax)}+` : `₹${fmtUSD(localMax)}`}
+          ₹{fmtUSD(budgetMin || 0)} — {budgetMax ? `₹${fmtUSD(budgetMax)}` : '∞ No Limit'}
         </p>
       )}
     </div>
@@ -308,7 +241,7 @@ const FilterSidebar = ({ filters, setFilters }) => {
           setFilters({
             category: null,
             budgetMin: BUDGET_MIN_LIMIT,
-            budgetMax: BUDGET_MAX_LIMIT,
+            budgetMax: null,
             skills: [],
             urgentOnly: false,
           })
@@ -334,7 +267,7 @@ const JobsPage = () => {
   ).length;
 
   const isBudgetFiltered =
-    filters.budgetMin > BUDGET_MIN_LIMIT || filters.budgetMax < BUDGET_MAX_LIMIT;
+    filters.budgetMin > BUDGET_MIN_LIMIT || filters.budgetMax !== null;
 
   useEffect(() => {
     fetchJobs();
@@ -379,7 +312,7 @@ const JobsPage = () => {
     setFilters({
       category: null,
       budgetMin: BUDGET_MIN_LIMIT,
-      budgetMax: BUDGET_MAX_LIMIT,
+      budgetMax: null,
       skills: [],
       urgentOnly: false,
     });
@@ -475,9 +408,9 @@ const JobsPage = () => {
 
               {isBudgetFiltered && (
                 <Badge variant="secondary" className="gap-1 pr-1">
-                  ₹{fmtUSD(filters.budgetMin)}–{filters.budgetMax === BUDGET_MAX_LIMIT ? `₹${fmtUSD(filters.budgetMax)}+` : `₹${fmtUSD(filters.budgetMax)}`}
+                  ₹{fmtUSD(filters.budgetMin)}–{filters.budgetMax ? `₹${fmtUSD(filters.budgetMax)}` : '∞'}
                   <button
-                    onClick={() => setFilters({ budgetMin: BUDGET_MIN_LIMIT, budgetMax: BUDGET_MAX_LIMIT })}
+                    onClick={() => setFilters({ budgetMin: BUDGET_MIN_LIMIT, budgetMax: null })}
                     className="ml-0.5 hover:text-destructive"
                   >
                     <X className="h-3 w-3" />
