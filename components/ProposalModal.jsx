@@ -120,7 +120,7 @@ const ProposalModal = ({ open, onOpenChange, job }) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Your Price ($)</Label>
+              <Label htmlFor="price">Your Price (₹)</Label>
               <Input
                 id="price"
                 type="number"

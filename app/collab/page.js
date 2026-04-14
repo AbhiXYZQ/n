@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Users, CheckCircle2, HandshakeIcon, MessageSquare, Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,25 +60,45 @@ const InterestModal = ({ collab, creator, open, onOpenChange, onSuccess }) => {
 
     setSubmitting(true);
 
-    // Simulate API call (replace with real API when backend is ready)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('/api/collab/interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collabId: collab.id,
+          collabTitle: collab.title,
+          creatorId: collab.creatorId,
+          ...interestForm
+        }),
+      });
 
-    setSubmitting(false);
-    onOpenChange(false);
-    onSuccess(collab.id);
+      const result = await response.json();
 
-    toast.success(`Interest sent to ${creator?.name}! They'll reach out soon.`, {
-      description: 'Your message and contact details have been shared.',
-      duration: 5000,
-    });
+      if (result.success) {
+        toast.success(`Interest sent to ${creator?.name}! They'll reach out soon.`, {
+          description: result.message,
+          duration: 5000,
+        });
+        
+        onOpenChange(false);
+        onSuccess(collab.id);
 
-    // Reset form
-    setInterestForm({
-      message: '',
-      skills: '',
-      contactEmail: user?.email || '',
-      contactWhatsApp: '',
-    });
+        // Reset form
+        setInterestForm({
+          message: '',
+          skills: '',
+          contactEmail: user?.email || '',
+          contactWhatsApp: '',
+        });
+      } else {
+        toast.error(result.message || 'Failed to send interest.');
+      }
+    } catch (err) {
+      console.error('[InterestModal]', err);
+      toast.error('Unable to send interest right now. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const charCount = interestForm.message.length;
@@ -345,7 +365,8 @@ const CollabCard = ({ collab, creator, user, isAuthenticated, onExpressInterest,
 // ─────────────────────────────────────────────────────────────
 const CollabPage = () => {
   const { user, isAuthenticated } = useAuthStore();
-  const [collabRooms, setCollabRooms] = useState(mockCollabRooms);
+  const [collabRooms, setCollabRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   // Track which collab IDs the current user has expressed interest in
   const [expressedInterestIds, setExpressedInterestIds] = useState(new Set());
@@ -355,9 +376,31 @@ const CollabPage = () => {
     description: '',
   });
 
-  const getCreator = (creatorId) => mockUsers.find((u) => u.id === creatorId);
+  const getCreator = (collab) => {
+    // If the API joined the creator, return it
+    if (collab.creator) return collab.creator;
+    // Otherwise fallback to mock users (for initial or mock data)
+    return mockUsers.find((u) => u.id === collab.creatorId);
+  };
 
-  const handleCreateCollab = (e) => {
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch('/api/collab');
+        const data = await response.json();
+        if (data.success) {
+          setCollabRooms(data.collabRooms);
+        }
+      } catch (err) {
+        console.error('Failed to fetch collabs:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRooms();
+  }, []);
+
+  const handleCreateCollab = async (e) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
@@ -365,17 +408,27 @@ const CollabPage = () => {
       return;
     }
 
-    const newCollab = {
-      id: uuidv4(),
-      creatorId: user.id,
-      ...formData,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const response = await fetch('/api/collab', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    setCollabRooms([newCollab, ...collabRooms]);
-    toast.success('Collab post created! Others can now express interest.');
-    setCreateDialogOpen(false);
-    setFormData({ title: '', requiredRole: '', description: '' });
+      const data = await response.json();
+
+      if (data.success) {
+        setCollabRooms([data.collab, ...collabRooms]);
+        toast.success('Collab post created! Others can now express interest.');
+        setCreateDialogOpen(false);
+        setFormData({ title: '', requiredRole: '', description: '' });
+      } else {
+        toast.error(data.message || 'Failed to create collab post.');
+      }
+    } catch (err) {
+      console.error('Create collab error:', err);
+      toast.error('Unable to create collab post right now.');
+    }
   };
 
   // Called when interest is successfully submitted from InterestModal
@@ -492,7 +545,12 @@ const CollabPage = () => {
             )}
           </div>
 
-          {collabRooms.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-muted-foreground animate-pulse text-lg">Loading collab rooms...</p>
+            </div>
+          ) : collabRooms.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center space-y-3">
                 <HandshakeIcon className="h-10 w-10 text-muted-foreground mx-auto" />
@@ -504,12 +562,12 @@ const CollabPage = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4 md:gap-6">
               {collabRooms.map((collab) => (
                 <CollabCard
                   key={collab.id}
                   collab={collab}
-                  creator={getCreator(collab.creatorId)}
+                  creator={getCreator(collab)}
                   user={user}
                   isAuthenticated={isAuthenticated}
                   alreadySent={expressedInterestIds.has(collab.id)}

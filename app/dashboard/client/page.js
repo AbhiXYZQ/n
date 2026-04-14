@@ -225,24 +225,24 @@ const ClientDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="budgetMin">Budget Min ($)</Label>
+                    <Label htmlFor="budgetMin">Budget Min (₹)</Label>
                     <Input
                       id="budgetMin"
                       type="number"
                       value={jobForm.budgetMin}
                       onChange={(e) => setJobForm({ ...jobForm, budgetMin: e.target.value })}
-                      placeholder="2000"
+                      placeholder="5000"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="budgetMax">Budget Max ($)</Label>
+                    <Label htmlFor="budgetMax">Budget Max (₹)</Label>
                     <Input
                       id="budgetMax"
                       type="number"
                       value={jobForm.budgetMax}
                       onChange={(e) => setJobForm({ ...jobForm, budgetMax: e.target.value })}
-                      placeholder="5000"
+                      placeholder="20000"
                       required
                     />
                   </div>
@@ -269,7 +269,7 @@ const ClientDashboard = () => {
                       className="rounded"
                     />
                     <Label htmlFor="featured" className="cursor-pointer">
-                      Boost as Featured Job ($9)
+                      Boost as Featured Job (from ₹399)
                     </Label>
                   </div>
                   {jobForm.isFeatured && (
@@ -407,7 +407,7 @@ const ClientDashboard = () => {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
-                            <span>Budget: ${job.budgetMin.toLocaleString()} - ${job.budgetMax.toLocaleString()}</span>
+                            <span>Budget: ₹{job.budgetMin.toLocaleString()} - ₹{job.budgetMax.toLocaleString()}</span>
                             <span>•</span>
                             <span>{jobProposals.length} Proposals</span>
                           </div>
@@ -432,7 +432,7 @@ const ClientDashboard = () => {
                                       </div>
                                       <p className="text-sm text-muted-foreground mt-1">{proposal.pitch}</p>
                                       <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm">
-                                        <span>${proposal.price.toLocaleString()}</span>
+                                        <span>₹{proposal.price.toLocaleString()}</span>
                                         <span>•</span>
                                         <span>{proposal.estimatedDays} days</span>
                                       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, DollarSign, Sparkles, Zap, Building2, Users, ArrowRight, Briefcase } from 'lucide-react';
+import { Clock, IndianRupee, Sparkles, Zap, Building2, Users, ArrowRight, Briefcase } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -100,7 +100,7 @@ const JobCard = ({ job, onApply }) => {
               <div>
                 <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Est. Budget Range</p>
                 <div className="flex items-center text-foreground font-bold text-xl">
-                  <DollarSign className="mr-0.5 h-5 w-5 text-primary" />
+                  <IndianRupee className="mr-0.5 h-4 w-4 text-primary" />
                   <span>{job.budgetMin.toLocaleString()} - {job.budgetMax.toLocaleString()}</span>
                 </div>
               </div>

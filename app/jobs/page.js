@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Filter, X, DollarSign, SlidersHorizontal } from 'lucide-react';
+import { Filter, X, IndianRupee, SlidersHorizontal } from 'lucide-react';
 
 // Always use en-US so server and client produce identical strings → no hydration mismatch
 const fmtUSD = (n) => n.toLocaleString('en-US');
@@ -31,10 +31,10 @@ const BUDGET_MAX_LIMIT = 25000;
 // Budget presets for quick selection
 const BUDGET_PRESETS = [
   { label: 'Any', min: 0, max: 25000 },
-  { label: 'Under $1k', min: 0, max: 1000 },
-  { label: '$1k–$5k', min: 1000, max: 5000 },
-  { label: '$5k–$10k', min: 5000, max: 10000 },
-  { label: '$10k+', min: 10000, max: 25000 },
+  { label: 'Under ₹1k', min: 0, max: 1000 },
+  { label: '₹1k–₹5k', min: 1000, max: 5000 },
+  { label: '₹5k–₹10k', min: 5000, max: 10000 },
+  { label: '₹10k+', min: 10000, max: 25000 },
 ];
 
 const POPULAR_SKILLS = ['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'MongoDB'];
@@ -107,8 +107,8 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="flex items-center gap-1.5">
-          <DollarSign className="h-3.5 w-3.5" />
+        <Label className="flex items-center gap-1.5 font-bold">
+          <IndianRupee className="h-3.5 w-3.5" />
           Budget Range
         </Label>
         {!isDefaultBudget && (
@@ -188,7 +188,7 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
       {/* Min / Max text inputs */}
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Min ($)</Label>
+          <Label className="text-xs text-muted-foreground">Min (₹)</Label>
           <Input
             type="number"
             min={BUDGET_MIN_LIMIT}
@@ -201,7 +201,7 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Max ($)</Label>
+          <Label className="text-xs text-muted-foreground">Max (₹)</Label>
           <Input
             type="number"
             min={BUDGET_MIN_LIMIT}
@@ -218,7 +218,7 @@ const BudgetFilter = ({ budgetMin, budgetMax, onBudgetChange }) => {
       {/* Live preview label */}
       {!isDefaultBudget && (
         <p className="text-xs text-center text-primary font-medium">
-          ${fmtUSD(localMin)} — ${localMax === BUDGET_MAX_LIMIT ? `${fmtUSD(localMax)}+` : fmtUSD(localMax)}
+          ₹{fmtUSD(localMin)} — {localMax === BUDGET_MAX_LIMIT ? `₹${fmtUSD(localMax)}+` : `₹${fmtUSD(localMax)}`}
         </p>
       )}
     </div>
@@ -475,7 +475,7 @@ const JobsPage = () => {
 
               {isBudgetFiltered && (
                 <Badge variant="secondary" className="gap-1 pr-1">
-                  ${fmtUSD(filters.budgetMin)}–${filters.budgetMax === BUDGET_MAX_LIMIT ? `${fmtUSD(filters.budgetMax)}+` : fmtUSD(filters.budgetMax)}
+                  ₹{fmtUSD(filters.budgetMin)}–{filters.budgetMax === BUDGET_MAX_LIMIT ? `₹${fmtUSD(filters.budgetMax)}+` : `₹${fmtUSD(filters.budgetMax)}`}
                   <button
                     onClick={() => setFilters({ budgetMin: BUDGET_MIN_LIMIT, budgetMax: BUDGET_MAX_LIMIT })}
                     className="ml-0.5 hover:text-destructive"

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getSupabase } from '@/lib/db/supabase';
 import { createSessionPayload, setSessionCookie } from '@/lib/auth/session';
 import { sendWelcomeEmail } from '@/lib/email/resend';
+import { triggerEmailVerification } from '@/lib/auth/verification';
 
 const hasResend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_YOUR_API_KEY_HERE';
 
@@ -205,14 +206,29 @@ export async function POST(request) {
       throw insertError;
     }
 
-    if (hasResend) {
-      sendWelcomeEmail({ to: newUser.email, name: newUser.name, username: newUser.username })
-        .catch((err) => console.error('[Resend] Welcome email failed:', err?.message));
+    // Trigger Email Verification OTP
+    try {
+      if (!isOAuth) {
+        // Only trigger for email/password signups. OAuth users are often pre-verified by the provider.
+        await triggerEmailVerification(newUser.id, newUser.email, newUser.name);
+      } else if (hasResend) {
+        // If OAuth, send welcome email directly
+        sendWelcomeEmail({ to: newUser.email, name: newUser.name, username: newUser.username })
+          .catch((err) => console.error('[Resend] Welcome email failed:', err?.message));
+      }
+    } catch (verifErr) {
+      console.error('[Register] Verification trigger failed:', verifErr.message);
+      // We continue because the user can manually request a resend if it failed here
     }
 
     const safeUser = toSafeUser(newUser);
     const response = NextResponse.json({ success: true, user: safeUser });
-    setSessionCookie(response, createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email }));
+    setSessionCookie(response, createSessionPayload({ 
+      userId: safeUser.id, 
+      role: safeUser.role, 
+      email: safeUser.email,
+      emailVerified: Boolean(oauthEmailVerified)
+    }));
     if (isOAuth) {
       response.cookies.delete('oauth_pending');
     }

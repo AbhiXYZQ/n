@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle2, DollarSign, ListTodo, GripVertical, ShieldCheck, Sparkles, Bot } from 'lucide-react';
+import { Clock, CheckCircle2, IndianRupee, ListTodo, GripVertical, ShieldCheck, Sparkles, Bot } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,9 @@ const FreelancerDashboard = () => {
 
   const myProposals = proposals.filter(p => p.freelancerId === user?.id);
   const totalEarnings = myProposals.reduce((sum, p) => sum + p.price, 0);
+  const avgMatchScore = myProposals.length > 0
+    ? Math.round(myProposals.reduce((sum, p) => sum + (p.smartMatchScore || 0), 0) / myProposals.length)
+    : null;
   const verificationActive = user?.monetization?.verificationBadgeActive;
   const aiProActive = user?.monetization?.aiProActive;
 
@@ -144,19 +147,24 @@ const FreelancerDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Potential Earnings</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalEarnings.toLocaleString()}</div>
+              <div className="text-2xl font-bold">₹{totalEarnings.toLocaleString('en-IN')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Avg Match Score</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">95%</div>
+              <div className="text-2xl font-bold">
+                {avgMatchScore !== null ? `${avgMatchScore}%` : '—'}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {avgMatchScore !== null ? 'Across your proposals' : 'No proposals yet'}
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -241,8 +249,8 @@ const FreelancerDashboard = () => {
                           <CardContent>
                             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                               <div className="flex items-center">
-                                <DollarSign className="mr-1 h-4 w-4 text-muted-foreground" />
-                                <span>${proposal.price.toLocaleString()}</span>
+                                <IndianRupee className="mr-1 h-4 w-4 text-muted-foreground" />
+                                <span>₹{proposal.price.toLocaleString('en-IN')}</span>
                               </div>
                               <span>•</span>
                               <div className="flex items-center">

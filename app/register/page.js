@@ -436,8 +436,8 @@ const RegisterPage = () => {
       }
 
       login(result.user);
-      toast.success('Account created successfully!');
-      router.push(result.user.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
+      toast.success('Account created successfully! Please verify your email.');
+      router.push(`/verify?email=${encodeURIComponent(trimmedData.email)}`);
     } catch {
       toast.error('Unable to create account right now. Please try again.');
     } finally {
@@ -544,37 +544,56 @@ const RegisterPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {/* Promo Banner */}
-            <div className="mb-6 rounded-xl border-2 border-primary/20 bg-primary/5 p-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-2 opacity-10">
-                <Sparkles className="h-20 w-20 text-primary" />
-              </div>
-              <h4 className="font-bold text-primary flex items-center gap-2 mb-2">
-                <CheckCircle2 className="h-5 w-5" /> Founding Member Registration
-              </h4>
-              <p className="text-sm text-foreground/80 mb-3">
-                You are exactly in time. Complete your profile today to claim your early access benefits.
-              </p>
-              <div className="flex gap-4 text-sm font-semibold">
-                <div className="bg-background/80 px-3 py-1.5 rounded-md border text-primary">
-                  {spotsLeft100} Lifetime Free spots left
+            {/* Promo Banner — role-aware */}
+            {role === 'FREELANCER' ? (
+              <div className="mb-6 rounded-xl border-2 border-primary/20 bg-primary/5 p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-2 opacity-10">
+                  <Sparkles className="h-20 w-20 text-primary" />
                 </div>
-                <div className="bg-background/80 px-3 py-1.5 rounded-md border text-accent">
-                  {spotsLeft500} Badges left
+                <h4 className="font-bold text-primary flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="h-5 w-5" /> Founding Member Registration
+                </h4>
+                <p className="text-sm text-foreground/80 mb-3">
+                  You are exactly in time. Complete your profile today to claim your early access benefits.
+                </p>
+                <div className="flex gap-4 text-sm font-semibold">
+                  <div className="bg-background/80 px-3 py-1.5 rounded-md border text-primary">
+                    {spotsLeft100} Lifetime Free spots left
+                  </div>
+                  <div className="bg-background/80 px-3 py-1.5 rounded-md border text-accent">
+                    {spotsLeft500} Badges left
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mb-6 rounded-xl border-2 border-accent/20 bg-accent/5 p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-2 opacity-10">
+                  <Sparkles className="h-20 w-20 text-accent" />
+                </div>
+                <h4 className="font-bold text-accent flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="h-5 w-5" /> Hire Developers Directly
+                </h4>
+                <p className="text-sm text-foreground/80 mb-3">
+                  Post projects, receive proposals from verified freelancers, and connect directly — no middlemen, no markups.
+                </p>
+                <div className="flex flex-wrap gap-3 text-sm font-semibold">
+                  <div className="bg-background/80 px-3 py-1.5 rounded-md border text-accent">
+                    Commission as low as 1%
+                  </div>
+                  <div className="bg-background/80 px-3 py-1.5 rounded-md border text-primary">
+                    Verified Talent Pool
+                  </div>
+                  <div className="bg-background/80 px-3 py-1.5 rounded-md border text-foreground/70">
+                    Direct Contact
+                  </div>
+                </div>
+              </div>
+            )}
 
-            <Tabs value={role} onValueChange={(val) => {
-              if (val === 'CLIENT') {
-                toast.info('Client registration is currently Invite-Only while we build our developer base. Join the Waitlist soon!');
-                return;
-              }
-              setRole(val);
-            }} className="mb-6">
+            <Tabs value={role} onValueChange={(val) => setRole(val)} className="mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="FREELANCER">I'm a Freelancer</TabsTrigger>
-                <TabsTrigger value="CLIENT" className="opacity-50 cursor-not-allowed">I'm a Client (Waitlist)</TabsTrigger>
+                <TabsTrigger value="CLIENT">I'm a Client</TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -713,8 +732,8 @@ const RegisterPage = () => {
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="hourlyRate">Hourly Rate (USD)</Label>
-                        <Input id="hourlyRate" name="hourlyRate" type="number" min="1" placeholder="30" value={formData.hourlyRate} onChange={handleChange} required />
+                        <Label htmlFor="hourlyRate">Hourly Rate (₹)</Label>
+                        <Input id="hourlyRate" name="hourlyRate" type="number" min="1" placeholder="500" value={formData.hourlyRate} onChange={handleChange} required />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="availability">Availability</Label>
@@ -789,10 +808,10 @@ const RegisterPage = () => {
                             <SelectValue placeholder="Select budget range" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="UNDER_1000">Under $1k</SelectItem>
-                            <SelectItem value="1000_5000">$1k - $5k</SelectItem>
-                            <SelectItem value="5000_20000">$5k - $20k</SelectItem>
-                            <SelectItem value="20000_PLUS">$20k+</SelectItem>
+                            <SelectItem value="UNDER_1000">Under ₹1k</SelectItem>
+                            <SelectItem value="1000_5000">₹1k - ₹5k</SelectItem>
+                            <SelectItem value="5000_20000">₹5k - ₹20k</SelectItem>
+                            <SelectItem value="20000_PLUS">₹20k+</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

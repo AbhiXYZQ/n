@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Mail, Github, Linkedin, MessageCircle, Shield, Play, Sparkles, ArrowLeft,
-  UserX, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Award, Calendar, Globe
+  UserX, RefreshCw, MapPin, Briefcase, Clock, IndianRupee, Award, Calendar, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -68,7 +68,14 @@ const NotFoundState = ({ username, onRetry }) => {
 // ─────────────────────────────────────────────────────────────
 // Format Helpers
 // ─────────────────────────────────────────────────────────────
-const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
+const formatCurrency = (val) => {
+  const formatted = new Intl.NumberFormat('en-IN', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(val || 0);
+  return `₹${formatted}`;
+};
 
 // ─────────────────────────────────────────────────────────────
 // Main Profile Page
@@ -172,7 +179,7 @@ const ProfilePage = () => {
                     <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> <span className="text-foreground font-medium">{location}</span></div>
                   )}
                   {profile.hourlyRate > 0 && (
-                     <div className="flex items-center gap-1.5"><DollarSign className="h-4 w-4" /> <span className="text-foreground font-medium">{formatCurrency(profile.hourlyRate)}/hr</span></div>
+                     <div className="flex items-center gap-1.5 flex-none"><IndianRupee className="h-4 w-4" /> <span className="text-foreground font-medium">{formatCurrency(profile.hourlyRate)}/hr</span></div>
                   )}
                   {profile.experienceYears > 0 && (
                      <div className="flex items-center gap-1.5"><Award className="h-4 w-4" /> <span className="text-foreground font-medium">{profile.experienceYears} Yrs Exp.</span></div>

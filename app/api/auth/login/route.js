@@ -73,7 +73,12 @@ export async function POST(request) {
 
     const safeUser = toSafeUser(user);
     const response = NextResponse.json({ success: true, user: safeUser });
-    setSessionCookie(response, createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email }));
+    setSessionCookie(response, createSessionPayload({
+      userId: safeUser.id,
+      role: safeUser.role,
+      email: safeUser.email,
+      emailVerified: !!user.contact_verification?.emailVerified
+    }));
     return response;
   } catch (error) {
     console.error('[Login]', error);

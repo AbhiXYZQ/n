@@ -171,7 +171,7 @@ export default function FoundersPage() {
                     <Zap className="h-6 w-6 text-amber-500" /> Legacy 0% Commission
                   </h4>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    As a reward for being in the first 100, you will keep **100% of your earnings** forever. Zero platform fees, zero subscriptions. You are the foundation of this platform.
+                    As a reward for being in the first 100, you will keep <strong className="text-foreground">100% of your earnings</strong> forever. Zero platform fees, zero subscriptions. You are the foundation of this platform.
                   </p>
                 </div>
               </CardContent>
@@ -201,7 +201,7 @@ export default function FoundersPage() {
                     <Award className="h-6 w-6 text-primary" /> Preferred Low Rates
                   </h4>
                   <p className="text-muted-foreground leading-relaxed text-lg">
-                    An exclusive, verifiable "Founding Member" badge. You'll gain access to our **1% commission tier** immediately, along with profile boosts to help you win high-ticket projects.
+                    An exclusive, verifiable "Founding Member" badge. You'll gain access to our <strong className="text-foreground">1% commission tier</strong> immediately, along with profile boosts to help you win high-ticket projects.
                   </p>
                 </div>
               </CardContent>

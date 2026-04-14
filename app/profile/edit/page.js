@@ -302,7 +302,7 @@ const EditProfilePage = () => {
                   <Input id="edit-title" value={form.professionalTitle} onChange={(e) => set('professionalTitle', e.target.value)} placeholder="Full Stack Developer" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-rate">Hourly Rate (USD/hr)</Label>
+                  <Label htmlFor="edit-rate">Hourly Rate (₹/hr)</Label>
                   <Input id="edit-rate" type="number" min="1" value={form.hourlyRate} onChange={(e) => set('hourlyRate', e.target.value)} placeholder="30" />
                 </div>
               </div>

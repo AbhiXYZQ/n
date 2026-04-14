@@ -5,6 +5,11 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 const ADMIN_EMAIL = 'hello@nainix.me';
 
 export async function GET(request) {
+  // Block entirely in production — this is a dev-only debug route
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ success: false, message: 'Not found.' }, { status: 404 });
+  }
+
   try {
     const session = getSessionFromRequest(request);
     
@@ -26,9 +31,7 @@ export async function GET(request) {
         success: false, 
         step: 'connection_test',
         error: error.message, 
-        code: error.code,
-        details: error.details,
-        hint: error.hint
+        code: error.code
       });
     }
 
@@ -41,8 +44,8 @@ export async function GET(request) {
     return NextResponse.json({ 
       success: false, 
       step: 'catch',
-      error: err.message,
-      stack: err.stack?.split('\n').slice(0, 5).join('\n')
+      error: err.message
+      // stack trace intentionally omitted — never expose in any env
     });
   }
 }

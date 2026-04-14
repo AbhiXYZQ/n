@@ -1,13 +1,35 @@
 import { NextResponse } from 'next/server';
 import { rateLimit, getClientIp } from './lib/security/rate-limit';
 
+const SESSION_COOKIE_NAME = 'nainix_session';
+
 /**
  * Global Security Middleware
- * Implements high-level security headers and rate limiting.
+ * Implements high-level security headers, rate limiting, and verification guards.
  */
 export function middleware(request) {
   const url = request.nextUrl.pathname;
   const ip = getClientIp(request);
+
+  // --- Verification Guard Phase ---
+  // Protect dashboard routes: if logged in but not verified, redirect to /verify
+  if (url.startsWith('/dashboard')) {
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (sessionCookie) {
+      try {
+        // Basic extraction (Note: This doesn't verify signature, just reads payload for UI/UX redirection)
+        // Authentic verification happens in API routes/Server components.
+        const [encodedPayload] = sessionCookie.split('.');
+        const payload = JSON.parse(atob(encodedPayload.replace(/-/g, '+').replace(/_/g, '/')));
+        
+        if (payload && !payload.emailVerified && url !== '/verify') {
+          return NextResponse.redirect(new URL('/verify', request.url));
+        }
+      } catch (e) {
+        // Ignore parsing errors, let original flow handle it
+      }
+    }
+  }
 
   // --- Rate Limiting Phase ---
   // Stricter limits for login and register (5 attempts per minute)
