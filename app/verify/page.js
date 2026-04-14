@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Mail, Loader2, ArrowRight, RefreshCcw } from 'lucide-react';
+import { Mail, Loader2, ArrowRight, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import useAuthStore from '@/lib/store/authStore';
 
-const VerifyPage = () => {
+const VerifyContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated } = useAuthStore();
@@ -197,4 +197,14 @@ const VerifyPage = () => {
   );
 };
 
-export default VerifyPage;
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
+  );
+}
