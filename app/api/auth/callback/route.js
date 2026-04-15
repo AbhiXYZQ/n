@@ -74,7 +74,12 @@ export async function POST(request) {
         user: safeUser,
         redirect: existingUser.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer'
       });
-      setSessionCookie(response, createSessionPayload({ userId: safeUser.id, role: safeUser.role, email: safeUser.email }));
+      setSessionCookie(response, createSessionPayload({ 
+        userId: safeUser.id, 
+        role: safeUser.role, 
+        email: safeUser.email,
+        emailVerified: true 
+      }));
       return response;
     } else {
       // User does NOT exist in custom 'users' table. Need to register.

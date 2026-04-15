@@ -436,8 +436,13 @@ const RegisterPage = () => {
       }
 
       login(result.user);
-      toast.success('Account created successfully! Please verify your email.');
-      router.push(`/verify?email=${encodeURIComponent(trimmedData.email)}`);
+      if (isOAuth) {
+        toast.success(`Welcome to Nainix, ${result.user.name}!`);
+        router.push(role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer');
+      } else {
+        toast.success('Account created successfully! Please verify your email.');
+        router.push(`/verify?email=${encodeURIComponent(trimmedData.email)}`);
+      }
     } catch {
       toast.error('Unable to create account right now. Please try again.');
     } finally {
