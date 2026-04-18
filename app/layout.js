@@ -7,6 +7,7 @@ import PremiumChatbot from '@/components/PremiumChatbot';
 import Preloader from '@/components/Preloader';
 import Script from 'next/script';
 import StructuredData from '@/components/StructuredData';
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata = {
   metadataBase: new URL('https://nainix.me'),
@@ -76,6 +77,7 @@ export default function RootLayout({ children }) {
             <PremiumChatbot />
           </div>
           <Toaster />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
