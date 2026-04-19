@@ -72,7 +72,7 @@ export function middleware(request) {
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.gstatic.com https://checkout.razorpay.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://*.supabase.co https://*.googleusercontent.com https://images.unsplash.com https://i.pravatar.cc https://*.razorpay.com;
+    img-src 'self' blob: data: https://*.supabase.co https://*.googleusercontent.com https://images.unsplash.com https://i.pravatar.cc https://*.razorpay.com https://*.dicebear.com;
     font-src 'self' data: https://fonts.gstatic.com;
     connect-src 'self' https://api.razorpay.com https://*.supabase.co https://*.google.com;
     frame-src 'self' https://api.razorpay.com;

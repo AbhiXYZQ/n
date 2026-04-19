@@ -55,7 +55,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/client" className="hover:text-primary transition-colors">
+                <Link href="/dashboard" className="hover:text-primary transition-colors">
                   Dashboard
                 </Link>
               </li>
@@ -81,7 +81,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/freelancer" className="hover:text-primary transition-colors">
+                <Link href="/dashboard" className="hover:text-primary transition-colors">
                   Freelancer Dashboard
                 </Link>
               </li>
@@ -102,7 +102,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/client" className="hover:text-primary transition-colors">
+                <Link href="/dashboard" className="hover:text-primary transition-colors">
                   Client Dashboard
                 </Link>
               </li>
@@ -157,7 +157,7 @@ const Footer = () => {
               </svg>
             </a>
 
-            <a href="https://www.linkedin.com/company/nainix/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://linkedin.com/company/nainix" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-muted-foreground hover:text-primary transition-colors">
               <Linkedin className="h-5 w-5" />
             </a>
 
@@ -165,7 +165,7 @@ const Footer = () => {
               <Instagram className="h-5 w-5" />
             </a>
 
-            <a href="https://youtube.com/@nainix-me" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://youtube.com/@nainix.me" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors">
               <Youtube className="h-5 w-5" />
             </a>
           </div>

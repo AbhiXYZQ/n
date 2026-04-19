@@ -31,7 +31,7 @@ const plans = [
     description: 'Push your job to top spots and lower your commission.',
     features: ['8% platform commission', 'Top placement in jobs feed', 'Priority visibility badge'],
     cta: 'Boost Job',
-    href: '/dashboard/client',
+    href: '/dashboard',
     accent: false,
     featureKey: 'FEATURED_JOB'
   },
@@ -44,7 +44,7 @@ const plans = [
     description: 'Build trust with a verified status and keep more earnings.',
     features: ['4% platform commission', 'Higher response confidence', 'Trust highlight in listings'],
     cta: 'Get Verified',
-    href: '/dashboard/freelancer',
+    href: '/dashboard',
     accent: false,
     featureKey: 'VERIFICATION_BADGE'
   },
@@ -57,7 +57,7 @@ const plans = [
     description: 'The ultimate toolset for professionals with the lowest fees.',
     features: ['1% platform commission', 'AI proposal enhancement', 'Premium smart matching insights'],
     cta: 'Upgrade to AI Pro',
-    href: '/dashboard/freelancer',
+    href: '/dashboard',
     accent: true,
     featureKey: 'AI_PRO'
   }

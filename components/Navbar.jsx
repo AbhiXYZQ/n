@@ -45,7 +45,14 @@ const Navbar = () => {
     }
   };
 
-  // ... (handleCommandSelect remains same)
+  const handleCommandSelect = (slug) => {
+    setOpen(false);
+    if (slug === 'dashboard') {
+      router.push('/dashboard');
+    } else {
+      router.push(`/${slug}`);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -129,7 +136,7 @@ const Navbar = () => {
                   <Link href={`/${user?.username}`}>Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={user?.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer'}>Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">Logout</DropdownMenuItem>
@@ -219,7 +226,7 @@ const Navbar = () => {
                   ) : (
                     <div className="space-y-2 p-2">
                        <Link 
-                        href={user?.role === 'CLIENT' ? '/dashboard/client' : '/dashboard/freelancer'} 
+                        href="/dashboard" 
                         onClick={() => setIsSheetOpen(false)}
                         className="flex items-center px-4 py-3 rounded-xl font-bold bg-muted/40 hover:bg-muted transition-all"
                       >

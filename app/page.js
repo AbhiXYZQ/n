@@ -6,8 +6,11 @@ import { ArrowRight, Shield, Zap, Users, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { mockSuccessStories } from '@/lib/db/schema';
+import useAuthStore from '@/lib/store/authStore';
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuthStore();
+  
   return (
     <div className="w-full">
       {/* 🚀 NEW FOUNDERS TOP BANNER */}
@@ -71,7 +74,9 @@ const LandingPage = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                <Link href="/register">Post a Project</Link>
+                <Link href={isAuthenticated ? "/dashboard" : "/register"}>
+                  {isAuthenticated ? "Go to Dashboard" : "Post a Project"}
+                </Link>
               </Button>
             </div>
           </motion.div>
@@ -225,7 +230,7 @@ const LandingPage = () => {
                     {plan.desc}
                   </p>
                   <Button variant={plan.title === 'AI Pro Plan' ? 'default' : 'outline'} className="w-full mt-4" asChild>
-                    <Link href="/register">Get Started</Link>
+                    <Link href={isAuthenticated ? "/pricing" : "/register"}>Get Started</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -290,7 +295,9 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">Get Started Free</Link>
+                <Link href={isAuthenticated ? "/dashboard" : "/register"}>
+                  {isAuthenticated ? "My Dashboard" : "Get Started Free"}
+                </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href="/jobs">Browse Jobs</Link>
