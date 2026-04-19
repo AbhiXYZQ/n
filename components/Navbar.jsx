@@ -17,6 +17,7 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
+  SheetDescription,
   SheetTrigger 
 } from '@/components/ui/sheet';
 
@@ -161,6 +162,9 @@ const Navbar = () => {
                 <SheetTitle className="text-left font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Nainix Menu
                 </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Navigate through Nainix Marketplace, Pricing, and Account settings.
+                </SheetDescription>
               </SheetHeader>
               
               <div className="flex flex-col p-4 h-[calc(100vh-80px)] overflow-y-auto scrollbar-none">
@@ -247,6 +251,10 @@ const Navbar = () => {
 
       {/* Command Dialog */}
       <CommandDialog open={open} onOpenChange={setOpen}>
+        <div className="sr-only">
+          <h2>Search Commands</h2>
+          <p>Search for jobs, community collab, and profile settings.</p>
+        </div>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
