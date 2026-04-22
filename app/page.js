@@ -8,6 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { mockSuccessStories } from '@/lib/db/schema';
 import useAuthStore from '@/lib/store/authStore';
 
+import MagneticGrid from '@/components/MagneticGrid';
+import { PlexusSection, FloatingShowcase, ImpactNumbers } from '@/components/VisualBreaks';
+
 const LandingPage = () => {
   const { isAuthenticated } = useAuthStore();
   
@@ -25,8 +28,9 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
-        <div className="container relative py-24 md:py-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        <MagneticGrid />
+        <div className="container relative z-10 py-24 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -39,7 +43,7 @@ const LandingPage = () => {
             </div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              <span className="hero-text-gradient">
                 Hire Developers Directly.
               </span>
               <br />
@@ -94,6 +98,8 @@ const LandingPage = () => {
         </div>
       </section>
 
+      <PlexusSection />
+
       {/* Feature Highlights */}
       <section className="container py-24">
         <motion.div
@@ -114,7 +120,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="premium-glass hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]">
               <CardContent className="p-6 space-y-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Zap className="h-6 w-6 text-primary" />
@@ -128,7 +134,7 @@ const LandingPage = () => {
             </Card>
 
             {/* Feature 2 */}
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="premium-glass hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]">
               <CardContent className="p-6 space-y-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Users className="h-6 w-6 text-primary" />
@@ -142,7 +148,7 @@ const LandingPage = () => {
             </Card>
 
             {/* Feature 3 */}
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="premium-glass hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]">
               <CardContent className="p-6 space-y-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Shield className="h-6 w-6 text-primary" />
@@ -157,6 +163,8 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </section>
+
+      <FloatingShowcase />
 
       {/* How It Works */}
       <section id="how-it-works" className="container py-24 scroll-mt-24">
@@ -195,6 +203,8 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </section>
+
+      <ImpactNumbers />
 
       {/* Pricing Tiers Section */}
       <section id="pricing" className="container py-24 scroll-mt-24">
