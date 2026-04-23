@@ -9,7 +9,7 @@ import { mockSuccessStories } from '@/lib/db/schema';
 import useAuthStore from '@/lib/store/authStore';
 
 import MagneticGrid from '@/components/MagneticGrid';
-import { PlexusSection, FloatingShowcase, ImpactNumbers } from '@/components/VisualBreaks';
+import { PlexusSection, FloatingShowcase, ImpactNumbers, NeuralEngine } from '@/components/VisualBreaks';
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuthStore();
@@ -292,6 +292,8 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </section>
+
+      <NeuralEngine />
 
       {/* CTA Section */}
       <section className="container py-24">
