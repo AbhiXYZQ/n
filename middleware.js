@@ -11,6 +11,15 @@ export function middleware(request) {
   const url = request.nextUrl.pathname;
   const ip = getClientIp(request);
 
+  // --- Auth Redirect Phase ---
+  // If already logged in, redirect away from auth pages
+  if (url === '/login' || url === '/register') {
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (sessionCookie) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  }
+
   // --- Verification Guard Phase ---
   // Protect dashboard routes: if logged in but not verified, redirect to /verify
   if (url.startsWith('/dashboard')) {
