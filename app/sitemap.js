@@ -1,11 +1,13 @@
 export default function sitemap() {
-  const baseUrl = 'https://nainix.me';
+  const baseUrl = 'https://www.nainix.me';
 
   const routes = [
     '',
     '/jobs',
     '/pricing',
     '/founders',
+    '/faq',
+    '/contact',
     '/login',
     '/register',
     '/legal',

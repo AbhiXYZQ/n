@@ -17,6 +17,6 @@ export default function robots() {
         allow: '/',
       },
     ],
-    sitemap: 'https://nainix.me/sitemap.xml',
+    sitemap: 'https://www.nainix.me/sitemap.xml',
   };
 }
