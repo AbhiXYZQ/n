@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/db/supabase';
+
+export const dynamic = 'force-dynamic';
 
 function normalizeJob(j) {
   return {
@@ -31,9 +33,12 @@ function getSafeClient(user) {
   };
 }
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
-    const { id } = params;
+    // Next.js 14+: params must be awaited
+    const params = await context.params;
+    const id = params?.id;
+
     if (!id) {
       return NextResponse.json({ success: false, message: 'Job ID is required' }, { status: 400 });
     }
@@ -45,9 +50,7 @@ export async function GET(request, { params }) {
       .eq('id', id)
       .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     if (!job) {
       return NextResponse.json({ success: false, message: 'Job not found' }, { status: 404 });

@@ -37,8 +37,11 @@ function toSafeUser(user, isOwner = false) {
   return safe;
 }
 
-export async function GET(request, { params }) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request, context) {
   try {
+    const params = await context.params;
     const username = String(params?.username || '').trim().toLowerCase();
     if (!username) {
       return NextResponse.json({ success: false, message: 'Username is required.' }, { status: 400 });
