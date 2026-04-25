@@ -66,6 +66,8 @@ export default function ComingSoonPage() {
   const [time, setTime] = useState(getTimeLeft());
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const canvasRef = useRef(null);
 
   // Countdown tick
@@ -131,9 +133,28 @@ export default function ComingSoonPage() {
     };
   }, []);
 
-  const handleNotify = (e) => {
+  const handleNotify = async (e) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    if (!email) return;
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMsg(data.message || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setErrorMsg('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -237,25 +258,40 @@ export default function ComingSoonPage() {
               className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-semibold text-sm"
             >
               <span className="text-xl">🎉</span>
-              You're on the list! We'll notify you on launch day.
+              You're on the list! Check your inbox for a confirmation.
             </motion.div>
           ) : (
-            <form onSubmit={handleNotify} className="flex gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Enter your email for early access"
-                required
-                className="flex-1 px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all"
-              />
-              <button
-                type="submit"
-                className="px-5 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-all duration-200 whitespace-nowrap hover:shadow-lg hover:shadow-violet-500/25 active:scale-95"
-              >
-                Notify Me
-              </button>
-            </form>
+            <div className="space-y-3">
+              <form onSubmit={handleNotify} className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Enter your email for early access"
+                  required
+                  disabled={loading}
+                  className="flex-1 px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-all duration-200 whitespace-nowrap hover:shadow-lg hover:shadow-violet-500/25 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : 'Notify Me'}
+                </button>
+              </form>
+              {errorMsg && (
+                <p className="text-red-400 text-xs text-center">{errorMsg}</p>
+              )}
+            </div>
           )}
         </motion.div>
 
