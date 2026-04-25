@@ -76,10 +76,9 @@ export async function GET(request) {
       // Payments — optional table
       supabase.from('payments').select('amount').then(r => r).catch(() => ({ data: [] })),
 
-      // User growth — last 14 days
+      // User growth — fetch all to ensure accuracy (small dataset)
       supabase.from('users')
         .select('created_at')
-        .gte('created_at', daysAgo(14))
         .order('created_at', { ascending: true }),
 
       // Jobs per week — last 8 weeks
@@ -113,30 +112,29 @@ export async function GET(request) {
     // ── User growth chart (last 14 days, cumulative) ─────────
     const growthMap = {};
     const now = new Date();
+    const windowDays = 14;
+    const windowStartDate = new Date(Date.now() - (windowDays - 1) * 24 * 60 * 60 * 1000);
+    windowStartDate.setHours(0,0,0,0);
+    const windowStartISO = windowStartDate.toISOString().split('T')[0];
     
-    // Generate keys in YYYY-MM-DD format using UTC to be safe
-    for (let i = 13; i >= 0; i--) {
+    for (let i = windowDays - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split('T')[0];
       growthMap[key] = 0;
     }
     
+    let usersBeforeWindow = 0;
     (userGrowthRes.data || []).forEach(u => {
       if (!u.created_at) return;
-      // Use string splitting to avoid timezone shifts from new Date()
-      // Supabase returns "YYYY-MM-DD HH:mm:ss..." or ISO
       const day = u.created_at.split('T')[0].split(' ')[0];
       if (growthMap[day] !== undefined) {
         growthMap[day]++;
+      } else if (day < windowStartISO) {
+        usersBeforeWindow++;
       }
     });
 
-    // Calculate cumulative total
-    const totalUsersNow = usersRes.count || 0;
-    const totalNewInWindow = (userGrowthRes.data || []).length;
-    // We start from total minus what we found in the window
-    let runningTotal = Math.max(0, totalUsersNow - totalNewInWindow);
-
+    let runningTotal = usersBeforeWindow;
     const userGrowth = Object.entries(growthMap).map(([date, newCount]) => {
       runningTotal += newCount;
       return {
