@@ -38,7 +38,10 @@ export async function PATCH(request, context) {
         message = 'User has been unbanned.';
         break;
       case 'verify':
-        update  = { email_verified: true, updated_at: new Date().toISOString() };
+        update  = {
+          contact_verification: { emailVerified: true, emailVerifiedAt: new Date().toISOString() },
+          updated_at: new Date().toISOString()
+        };
         message = 'User email has been force-verified.';
         break;
       default:

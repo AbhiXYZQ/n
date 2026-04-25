@@ -27,22 +27,31 @@ export async function GET(request) {
     const supabase = getSupabase();
     let query = supabase
       .from('users')
-      .select('id, name, email, username, role, email_verified, created_at, country, city, phone, monetization', { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     if (search) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,username.ilike.%${search}%`);
     }
-    if (role)  query = query.eq('role', role);
-    if (plan)  query = query.eq('monetization->>plan', plan);
-    if (verified === 'YES') query = query.eq('email_verified', true);
-    if (verified === 'NO')  query = query.eq('email_verified', false);
+    if (role) query = query.eq('role', role);
+    if (plan) query = query.eq('monetization->>plan', plan);
+
+    // email verified is stored inside contact_verification JSONB as emailVerified
+    if (verified === 'YES') query = query.eq('contact_verification->>emailVerified', 'true');
+    if (verified === 'NO')  query = query.or('contact_verification.is.null,contact_verification->>emailVerified.eq.false');
 
     query = query.order('created_at', { ascending: false }).range(from, from + limit - 1);
 
     const { data, count, error } = await query;
     if (error) throw error;
 
-    return NextResponse.json({ success: true, users: data || [], total: count || 0, page, limit });
+    // Normalize data for frontend
+    const users = (data || []).map(u => ({
+      ...u,
+      email_verified: u.contact_verification?.emailVerified || false,
+      plan: u.monetization?.plan || 'FREE',
+    }));
+
+    return NextResponse.json({ success: true, users, total: count || 0, page, limit });
   } catch (err) {
     console.error('[Admin Users GET]', err);
     return NextResponse.json({ success: false, message: 'Failed to fetch users.' }, { status: 500 });
