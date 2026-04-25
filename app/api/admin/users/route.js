@@ -51,7 +51,10 @@ export async function GET(request) {
       plan: u.monetization?.plan || 'FREE',
     }));
 
-    return NextResponse.json({ success: true, users, total: count || 0, page, limit });
+    return NextResponse.json(
+      { success: true, users, total: count || 0, page, limit },
+      { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } }
+    );
   } catch (err) {
     console.error('[Admin Users GET]', err);
     return NextResponse.json({ success: false, message: 'Failed to fetch users.' }, { status: 500 });

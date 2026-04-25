@@ -126,7 +126,10 @@ export default function AdminUsersPage() {
         ...(planFilter !== 'ALL' && { plan: planFilter }),
         ...(verFilter  !== 'ALL' && { verified: verFilter }),
       });
-      const res  = await fetch(`/api/admin/users?${params}`);
+      const res  = await fetch(`/api/admin/users?${params}&t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+      });
       const data = await res.json();
       if (data.success) { setUsers(data.users); setTotal(data.total); }
     } finally { setLoading(false); }
