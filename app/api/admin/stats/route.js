@@ -98,28 +98,37 @@ export async function GET(request) {
     );
 
     // ── Role split for pie chart ───────────────────────────────
-    const [clientCountRes, freelancerCountRes] = await Promise.all([
-      supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'CLIENT'),
-      supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'FREELANCER'),
+    const [clientCountRes, freelancerCountRes, adminCountRes] = await Promise.all([
+      supabase.from('users').select('id', { count: 'exact' }).eq('role', 'CLIENT'),
+      supabase.from('users').select('id', { count: 'exact' }).eq('role', 'FREELANCER'),
+      supabase.from('users').select('id', { count: 'exact' }).eq('role', 'ADMIN'),
     ]);
 
     const roleSplit = [
-      { name: 'Clients',     value: clientCountRes.count || 0 },
+      { name: 'Clients',     value: clientCountRes.count     || 0 },
       { name: 'Freelancers', value: freelancerCountRes.count || 0 },
+      { name: 'Admins',      value: adminCountRes.count      || 0 },
     ];
 
     // ── User growth chart (last 14 days, group by day) ─────────
     const growthMap = {};
+    const todayUTC = new Date();
+    
     for (let i = 13; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
+      const d = new Date(todayUTC);
+      d.setUTCDate(d.getUTCDate() - i);
       const key = d.toISOString().split('T')[0];
       growthMap[key] = 0;
     }
+    
     (userGrowthRes.data || []).forEach(u => {
-      const day = u.created_at?.split('T')[0];
-      if (day && growthMap[day] !== undefined) growthMap[day]++;
+      if (!u.created_at) return;
+      const day = new Date(u.created_at).toISOString().split('T')[0];
+      if (growthMap[day] !== undefined) {
+        growthMap[day]++;
+      }
     });
+
     const userGrowth = Object.entries(growthMap).map(([date, users]) => ({
       date: formatDate(date),
       users,

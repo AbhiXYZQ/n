@@ -108,10 +108,15 @@ export default function AdminReportsPage() {
       <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:0.3}}
         className="rounded-2xl border border-white/5 p-5" style={{background:'rgba(255,255,255,0.02)'}}>
         <h3 className="text-sm font-semibold text-white mb-4">User Distribution</h3>
-        <div className="space-y-3">
-          {(data?.roleSplit||[{name:'Clients',value:0},{name:'Freelancers',value:0}]).map(({name,value})=>{
+        <div className="space-y-4">
+          {(data?.roleSplit||[{name:'Clients',value:0},{name:'Freelancers',value:0},{name:'Admins',value:0}]).map(({name,value}, i)=>{
             const total = (data?.totalUsers||1);
             const pct = Math.round((value/total)*100);
+            const colors = [
+              'from-violet-600 to-indigo-500',
+              'from-blue-600 to-cyan-500',
+              'from-rose-600 to-red-500'
+            ];
             return (
               <div key={name}>
                 <div className="flex justify-between text-xs mb-1.5">
@@ -119,8 +124,8 @@ export default function AdminReportsPage() {
                   <span className="text-slate-500">{value} ({pct}%)</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <motion.div initial={{width:0}} animate={{width:`${pct}%`}} transition={{duration:0.8,delay:0.4}}
-                    className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500"/>
+                  <motion.div initial={{width:0}} animate={{width:`${pct}%`}} transition={{duration:0.8,delay:0.4 + (i*0.1)}}
+                    className={`h-full rounded-full bg-gradient-to-r ${colors[i % colors.length]}`}/>
                 </div>
               </div>
             );

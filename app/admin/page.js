@@ -55,7 +55,7 @@ function SectionHeader({ title, sub }) {
 }
 
 const CHART_COLORS = ['#7c3aed', '#6366f1', '#a78bfa', '#818cf8', '#c4b5fd'];
-const PIE_COLORS  = ['#7c3aed', '#6366f1'];
+const PIE_COLORS  = ['#7c3aed', '#6366f1', '#e11d48'];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -165,28 +165,38 @@ export default function AdminOverviewPage() {
           className="rounded-2xl border border-white/5 p-5"
           style={{ background: 'rgba(255,255,255,0.02)' }}
         >
-          <SectionHeader title="User Roles" sub="CLIENT vs FREELANCER" />
+          <SectionHeader title="User Roles" sub="CLIENT vs FREELANCER vs ADMIN" />
           {loading ? (
             <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={stats?.roleSplit || [{ name: 'Clients', value: 0 }, { name: 'Freelancers', value: 0 }]}
-                  cx="50%" cy="50%"
-                  innerRadius={50} outerRadius={75}
-                  paddingAngle={4} dataKey="value"
-                >
-                  {(stats?.roleSplit || []).map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend
-                  formatter={(v) => <span style={{ color: '#94a3b8', fontSize: 11 }}>{v}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie
+                    data={stats?.roleSplit || [{ name: 'Clients', value: 0 }, { name: 'Freelancers', value: 0 }, { name: 'Admins', value: 0 }]}
+                    cx="50%" cy="50%"
+                    innerRadius={50} outerRadius={70}
+                    paddingAngle={4} dataKey="value"
+                  >
+                    {(stats?.roleSplit || []).map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-2 w-full mt-4">
+                {['Clients', 'Freelancers', 'Admins'].map((role, i) => (
+                  <div key={role} className="flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
+                      {role}
+                    </div>
+                    <span className="font-semibold text-white">{stats?.roleSplit?.find(r => r.name === role)?.value || 0}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </motion.div>
       </div>
