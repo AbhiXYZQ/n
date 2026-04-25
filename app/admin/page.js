@@ -153,7 +153,7 @@ export default function AdminOverviewPage() {
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="users" stroke="#7c3aed" strokeWidth={2.5} dot={false} name="New Users" />
+                <Line type="monotone" dataKey="users" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 4, fill: '#7c3aed' }} activeDot={{ r: 6 }} name="Total Users" />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -165,7 +165,7 @@ export default function AdminOverviewPage() {
           className="rounded-2xl border border-white/5 p-5"
           style={{ background: 'rgba(255,255,255,0.02)' }}
         >
-          <SectionHeader title="User Roles" sub="CLIENT vs FREELANCER vs ADMIN" />
+          <SectionHeader title="User Roles" sub="Distribution by Role" />
           {loading ? (
             <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
           ) : (

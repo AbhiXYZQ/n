@@ -79,7 +79,7 @@ export default function AdminReportsPage() {
                 <XAxis dataKey="date" tick={{fontSize:10,fill:'#64748b'}} axisLine={false} tickLine={false}/>
                 <YAxis tick={{fontSize:10,fill:'#64748b'}} axisLine={false} tickLine={false}/>
                 <Tooltip content={<CustomTooltip/>}/>
-                <Area type="monotone" dataKey="users" stroke="#7c3aed" strokeWidth={2.5} fill="url(#ug)" name="New Users"/>
+                <Area type="monotone" dataKey="users" stroke="#7c3aed" strokeWidth={2.5} fill="url(#ug)" name="Total Users"/>
               </AreaChart>
             </ResponsiveContainer>
           }
