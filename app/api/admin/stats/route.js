@@ -112,18 +112,20 @@ export async function GET(request) {
 
     // ── User growth chart (last 14 days, cumulative) ─────────
     const growthMap = {};
-    const todayUTC = new Date();
+    const now = new Date();
     
+    // Generate keys in YYYY-MM-DD format using UTC to be safe
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(todayUTC);
-      d.setUTCDate(d.getUTCDate() - i);
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split('T')[0];
       growthMap[key] = 0;
     }
     
     (userGrowthRes.data || []).forEach(u => {
       if (!u.created_at) return;
-      const day = new Date(u.created_at).toISOString().split('T')[0];
+      // Use string splitting to avoid timezone shifts from new Date()
+      // Supabase returns "YYYY-MM-DD HH:mm:ss..." or ISO
+      const day = u.created_at.split('T')[0].split(' ')[0];
       if (growthMap[day] !== undefined) {
         growthMap[day]++;
       }
@@ -132,6 +134,7 @@ export async function GET(request) {
     // Calculate cumulative total
     const totalUsersNow = usersRes.count || 0;
     const totalNewInWindow = (userGrowthRes.data || []).length;
+    // We start from total minus what we found in the window
     let runningTotal = Math.max(0, totalUsersNow - totalNewInWindow);
 
     const userGrowth = Object.entries(growthMap).map(([date, newCount]) => {
