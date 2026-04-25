@@ -167,19 +167,19 @@ export const ImpactNumbers = () => {
     }, [smoothProgress]);
 
     return (
-        <section ref={containerRef} className="h-[100vh] bg-background relative overflow-hidden flex items-center justify-center">
+        <section ref={containerRef} className="h-[60vh] md:h-[100vh] bg-background relative overflow-hidden flex items-center justify-center">
             <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
             <div className="relative z-10 w-full h-full flex flex-col items-center justify-center pointer-events-none px-4">
-                <h2 className="text-5xl md:text-7xl lg:text-9xl font-light uppercase tracking-widest leading-none flex flex-col items-center select-none text-center w-full max-w-[100vw] overflow-hidden px-4">
-                    <div className="flex justify-center gap-x-2 md:gap-x-6 text-transparent w-full" style={{ WebkitTextStroke: '2px hsl(var(--foreground) / 0.2)', WebkitTextFillColor: 'transparent' }}>
+                <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-light uppercase tracking-widest leading-none flex flex-col items-center select-none text-center w-full overflow-hidden px-2">
+                    <div className="flex justify-center gap-x-1 md:gap-x-6 text-transparent w-full" style={{ WebkitTextStroke: '1.5px hsl(var(--foreground) / 0.2)', WebkitTextFillColor: 'transparent' }}>
                         {"BEYOND".split("").map((c, i) => <InteractiveCharacter key={`beyond-${i}`} char={c} mouse={mouse} />)}
                     </div>
-                    <div className="flex justify-center gap-x-2 md:gap-x-6 text-transparent w-full mt-4 md:mt-8" style={{ WebkitTextStroke: '2px hsl(var(--foreground) / 0.1)', WebkitTextFillColor: 'transparent' }}>
+                    <div className="flex justify-center gap-x-1 md:gap-x-6 text-transparent w-full mt-3 md:mt-8" style={{ WebkitTextStroke: '1.5px hsl(var(--foreground) / 0.1)', WebkitTextFillColor: 'transparent' }}>
                         {"BORDERS".split("").map((c, i) => <InteractiveCharacter key={`borders-${i}`} char={c} mouse={mouse} />)}
                     </div>
                 </h2>
-                <motion.div style={{ opacity: useTransform(smoothProgress, [0.4, 0.5, 0.6], [0, 1, 0]), scale: useTransform(smoothProgress, [0.4, 0.5, 0.6], [0.8, 1, 0.8]) }} className="mt-10 px-8 py-3 border border-primary/40 rounded-full premium-glass shadow-[0_0_50px_rgba(var(--primary),0.2)]">
-                    <span className="text-primary text-sm font-black tracking-[0.5em] uppercase">Global Data Stream</span>
+                <motion.div style={{ opacity: useTransform(smoothProgress, [0.3, 0.5, 0.7], [0, 1, 0]) }} className="mt-6 md:mt-10 px-5 md:px-8 py-2 md:py-3 border border-primary/40 rounded-full premium-glass">
+                    <span className="text-primary text-xs md:text-sm font-black tracking-[0.3em] md:tracking-[0.5em] uppercase">Global Data Stream</span>
                 </motion.div>
             </div>
         </section>
@@ -309,36 +309,30 @@ export const NeuralEngine = () => {
     }, [mouse]);
 
     return (
-        <section ref={containerRef} className="h-[120vh] bg-background relative overflow-hidden flex flex-col items-center justify-center border-y border-primary/10">
+        <section ref={containerRef} className="min-h-[70vh] md:h-[120vh] bg-background relative overflow-hidden flex flex-col items-center justify-center border-y border-primary/10 py-16 md:py-0">
             <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
-            <div className="relative z-10 text-center space-y-8 px-4 w-full">
-                <motion.div style={{ opacity: useTransform(scrollYProgress, [0.1, 0.3, 0.7, 0.9], [0, 1, 1, 0]), scale: useTransform(scrollYProgress, [0.1, 0.3], [0.9, 1]) }} className="space-y-6 flex flex-col items-center">
-
-                    {/* Minimal High-Tech AUM Core */}
-                    <div className="flex justify-center mb-2">
-                        <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-background/50 backdrop-blur-sm border border-primary/20 shadow-[0_0_30px_rgba(var(--primary),0.1)]">
+            <div className="relative z-10 text-center space-y-6 md:space-y-8 px-4 w-full">
+                <motion.div style={{ opacity: useTransform(scrollYProgress, [0.1, 0.3, 0.7, 0.9], [0, 1, 1, 0]), scale: useTransform(scrollYProgress, [0.1, 0.3], [0.9, 1]) }} className="space-y-5 md:space-y-6 flex flex-col items-center">
+                    <div className="flex justify-center mb-1 md:mb-2">
+                        <div className="relative flex items-center justify-center w-16 h-16 md:w-24 md:h-24 rounded-full bg-background/50 backdrop-blur-sm border border-primary/20">
                             <div className="absolute inset-[-2px] rounded-full border-t-2 border-primary/50 animate-[spin_4s_linear_infinite]" />
                             <div className="absolute inset-2 rounded-full border-b-2 border-accent/40 animate-[spin_3s_linear_infinite_reverse]" />
-                            <span className="text-4xl text-primary font-serif drop-shadow-[0_0_10px_rgba(var(--primary),0.4)]">ॐ</span>
+                            <span className="text-2xl md:text-4xl text-primary font-serif">ॐ</span>
                         </div>
                     </div>
-
-                    <h2 className="text-6xl md:text-[7rem] font-black tracking-tighter leading-[0.9] uppercase relative select-none">
+                    <h2 className="text-4xl sm:text-6xl md:text-[7rem] font-black tracking-tighter leading-[0.9] uppercase relative select-none">
                         Powered <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">By AI.</span>
                     </h2>
-
-                    <p className="text-muted-foreground text-xl md:text-2xl max-w-2xl mx-auto font-medium">
+                    <p className="text-muted-foreground text-base sm:text-xl md:text-2xl max-w-2xl mx-auto font-medium px-2">
                         Advanced Neural Engine matching in <span className="text-primary italic">milliseconds.</span>
                     </p>
-
-                    <div className="pt-10">
-                        <Button size="lg" className="h-16 px-12 md:px-16 rounded-full text-lg font-bold uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_rgba(var(--primary),0.3)] transition-all duration-300 group">
+                    <div className="pt-4 md:pt-10">
+                        <Button size="lg" className="h-12 md:h-16 px-8 md:px-16 rounded-full text-base md:text-lg font-bold uppercase tracking-[0.15em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_30px_rgba(var(--primary),0.3)] transition-all duration-300 group active:scale-95">
                             Access AI Engine
-                            <ArrowRight className="ml-4 h-6 w-6 group-hover:translate-x-3 transition-transform duration-300" />
+                            <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
                         </Button>
                     </div>
-
                 </motion.div>
             </div>
         </section>
@@ -412,21 +406,21 @@ export const PlexusSection = () => {
         return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationFrameId); };
     }, [mouse]);
     return (
-        <section ref={containerRef} className="h-[600px] w-full relative bg-background border-y border-primary/20 flex items-center justify-center py-20 overflow-hidden">
+        <section ref={containerRef} className="h-[320px] sm:h-[450px] md:h-[600px] w-full relative bg-background border-y border-primary/20 flex items-center justify-center overflow-hidden">
             <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-100" />
-            <div className="relative z-10 text-center space-y-8 px-4 w-full">
-                <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] select-none">
+            <div className="relative z-10 text-center px-4 w-full">
+                <h2 className="text-3xl sm:text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] select-none">
                     <div className="flex flex-wrap justify-center opacity-90">
                         {"Connecting Developers Globally.".split(" ").map((word, wordIdx, arr) => (
-                            <span key={`word-conn-${wordIdx}`} className="inline-flex gap-x-[0.2em]">
+                            <span key={`word-conn-${wordIdx}`} className="inline-flex gap-x-[0.15em] sm:gap-x-[0.2em]">
                                 {word.split("").map((c, i) => <InteractiveCharacter key={i} char={c} mouse={mouse} />)}
                                 {wordIdx < arr.length - 1 && <InteractiveCharacter char=" " mouse={mouse} />}
                             </span>
                         ))}
                     </div>
-                    <div className="flex flex-wrap justify-center text-primary italic drop-shadow-[0_0_30px_rgba(var(--primary),0.3)]">
+                    <div className="flex flex-wrap justify-center text-primary italic">
                         {"the Future".split(" ").map((word, wordIdx, arr) => (
-                            <span key={`word-future-${wordIdx}`} className="inline-flex gap-x-[0.2em]">
+                            <span key={`word-future-${wordIdx}`} className="inline-flex gap-x-[0.15em] sm:gap-x-[0.2em]">
                                 {word.split("").map((c, i) => <InteractiveCharacter key={i} char={c} mouse={mouse} />)}
                                 {wordIdx < arr.length - 1 && <InteractiveCharacter char=" " mouse={mouse} />}
                             </span>
@@ -479,84 +473,59 @@ export const FloatingShowcase = () => {
     };
 
     return (
-        <section className="py-16 md:py-24 bg-background relative overflow-hidden">
-            <div className="container px-4 md:px-6">
+        <section className="py-10 md:py-24 bg-background relative overflow-hidden">
+            <div className="container px-3 md:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="relative bg-zinc-950 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-white/[0.06] shadow-2xl"
+                    className="relative bg-zinc-950 rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/[0.06] shadow-2xl"
                 >
-                    {/* Premium Background Elements */}
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(59,130,246,0.15),transparent_70%)]" />
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
                     <div className="absolute -left-20 top-0 w-80 h-80 bg-primary/5 blur-[120px] rounded-full" />
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-0 items-center p-8 md:p-16 lg:p-20 relative z-10">
-
-                        {/* Left: Text Content */}
-                        <div className="space-y-8 max-w-lg relative z-10">
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.95] select-none">
-                                <div className="flex flex-wrap gap-x-[0.3em]">
-                                    {"The Elite Talent".split(" ").map((word, wordIdx) => (
-                                        <span key={wordIdx} className="inline-flex">
-                                            {word.split("").map((c, i) => (
-                                                <InteractiveCharacter key={i} char={c} mouse={mouse} className="text-white" />
-                                            ))}
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className="flex flex-wrap gap-x-[0.3em] text-primary">
-                                    {"era has arrived".split(" ").map((word, wordIdx) => (
-                                        <span key={wordIdx} className="inline-flex">
-                                            {word.split("").map((c, i) => (
-                                                <InteractiveCharacter key={i} char={c} mouse={mouse} className="text-primary" />
-                                            ))}
-                                        </span>
-                                    ))}
-                                </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-0 items-center p-6 sm:p-10 md:p-16 lg:p-20 relative z-10">
+                        {/* Left */}
+                        <div className="space-y-5 md:space-y-8 max-w-lg relative z-10">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.95] select-none">
+                                <span className="block">The Elite Talent</span>
+                                <span className="block text-primary">era has arrived</span>
                             </h2>
-                            <p className="text-lg text-zinc-400 leading-relaxed max-w-md">
-                                From concept to delivery, work with the most exceptional freelance engineers and designers to build world-class products that drive real impact.
+                            <p className="text-sm sm:text-lg text-zinc-400 leading-relaxed max-w-md">
+                                From concept to delivery, work with exceptional freelance engineers to build world-class products.
                             </p>
-                            
-                            <UltraButton primary className="h-14 px-8 text-sm">
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                className="flex items-center gap-2 h-12 md:h-14 px-7 md:px-8 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/30 active:scale-95 transition-transform"
+                            >
                                 <span>Find your Expert</span>
-                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                            </UltraButton>
+                                <ArrowRight className="w-4 h-4" />
+                            </motion.button>
                         </div>
 
-                        {/* Right: 3D Carousel Stack */}
-                        <div className="relative flex items-center justify-center h-[340px] md:h-[400px]">
+                        {/* Right: Carousel */}
+                        <div className="relative flex items-center justify-center h-[260px] sm:h-[320px] md:h-[400px]">
                             {profiles.map((p, i) => {
-                                // Calculate position relative to activeIndex
                                 const relativeIndex = (i - activeIndex + profiles.length) % profiles.length;
                                 const layout = getLayout(relativeIndex);
                                 const isCenter = relativeIndex === 2;
-
                                 return (
                                     <motion.div
                                         key={p.name}
-                                        className="absolute top-1/2 left-1/2 -mt-[80px] -ml-[60px] md:-mt-[92px] md:-ml-[70px] w-[120px] h-[160px] md:w-[140px] md:h-[185px] cursor-pointer group"
+                                        className="absolute top-1/2 left-1/2 -mt-[65px] -ml-[48px] sm:-mt-[80px] sm:-ml-[60px] md:-mt-[92px] md:-ml-[70px] w-[96px] h-[128px] sm:w-[120px] sm:h-[160px] md:w-[140px] md:h-[185px] cursor-pointer"
                                         animate={layout}
                                         transition={{ duration: 0.5, ease: "easeInOut" }}
                                     >
-                                        {/* Card Body */}
-                                        <div className={`relative w-full h-full rounded-2xl overflow-hidden border-2 transition-colors duration-500 shadow-xl ${isCenter ? 'border-zinc-500 shadow-[0_20px_60px_rgba(0,0,0,0.5)]' : 'border-zinc-800'}`}>
-                                            <img
-                                                src={p.img}
-                                                alt={p.name}
-                                                className="absolute inset-0 w-full h-full object-cover"
-                                            />
+                                        <div className={`relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden border-2 shadow-xl ${isCenter ? 'border-zinc-500 shadow-[0_15px_40px_rgba(0,0,0,0.5)]' : 'border-zinc-800'}`}>
+                                            <img src={p.img} alt={p.name} className="absolute inset-0 w-full h-full object-cover" />
                                             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
                                         </div>
-
-                                        {/* Floating Name Label (Only visible on center card) */}
                                         <motion.p
-                                            animate={{ opacity: isCenter ? 1 : 0, y: isCenter ? 0 : 10 }}
+                                            animate={{ opacity: isCenter ? 1 : 0, y: isCenter ? 0 : 8 }}
                                             transition={{ duration: 0.4 }}
-                                            className="absolute -bottom-8 left-0 right-0 text-center text-sm text-white font-medium tracking-wide whitespace-nowrap"
+                                            className="absolute -bottom-6 left-0 right-0 text-center text-xs sm:text-sm text-white font-medium whitespace-nowrap"
                                         >
                                             {p.name}
                                         </motion.p>
@@ -564,7 +533,6 @@ export const FloatingShowcase = () => {
                                 );
                             })}
                         </div>
-
                     </div>
                 </motion.div>
             </div>
