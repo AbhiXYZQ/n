@@ -11,6 +11,7 @@ import useAuthStore from '@/lib/store/authStore';
 
 import MagneticGrid from '@/components/MagneticGrid';
 import { PlexusSection, FloatingShowcase, ImpactNumbers, NeuralEngine, InteractiveCharacter, UltraButton } from '@/components/VisualBreaks';
+import LaunchCountdown from '@/components/LaunchCountdown';
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuthStore();
@@ -56,6 +57,7 @@ const LandingPage = () => {
 
   return (
     <div className="w-full">
+      <LaunchCountdown />
       {/* Top Banner */}
       <div className="w-full bg-gradient-to-r from-primary via-accent to-primary p-0.5 text-center group cursor-pointer relative overflow-hidden">
         <Link href="/founders" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium text-white px-3 py-2 relative z-10 w-full">
