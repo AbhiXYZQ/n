@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, Moon, Sun, Menu, X, UserCog, Zap, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Separator } from '@/components/ui/separator';
 import useAuthStore from '@/lib/store/authStore';
 import { useTheme } from 'next-themes';
+import AnimatedLogo from '@/components/AnimatedLogo';
 import { 
   Sheet, 
   SheetContent, 
@@ -58,27 +58,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* ... (Logo remains same) ... */}
-        <Link href="/" className="flex items-center space-x-2 group">
-          <div className="relative flex items-center justify-center w-8 h-8">
-            <div className="absolute -inset-2 bg-primary/20 blur-md rounded-full z-0 transition-all duration-300 group-hover:bg-primary/30 group-hover:blur-lg" />
-            <Image 
-              src="/logo_light.png" 
-              alt="Nainix Logo" 
-              fill
-              className="object-contain block dark:hidden relative z-10"
-            />
-            <Image 
-              src="/logo_dark.png" 
-              alt="Nainix Logo" 
-              fill
-              className="object-contain hidden dark:block relative z-10"
-            />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Nainix
-          </span>
-        </Link>
+        <AnimatedLogo />
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
