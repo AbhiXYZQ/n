@@ -57,9 +57,13 @@ export default function ForgotPasswordPage() {
         {/* ── Removed Dev mode banner ─────────────────────────────── */}
 
         <Card>
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-2">
-              <Mail className="h-6 w-6 text-primary" />
+          <CardHeader className="space-y-4 text-center">
+            <div className="flex justify-center mb-2">
+              <Link href="/">
+                <div className="h-10 w-auto text-foreground">
+                  <span className="logo-font text-2xl font-normal tracking-wide">Nainix</span>
+                </div>
+              </Link>
             </div>
             <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
             <CardDescription>

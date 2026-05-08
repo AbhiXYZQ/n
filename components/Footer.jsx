@@ -10,9 +10,11 @@ const Footer = () => {
       <div className="container py-10 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5 lg:gap-10">
           <div className="space-y-4 lg:col-span-2">
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Nainix
-            </h3>
+            <Link href="/" className="flex items-center gap-2 select-none group">
+              <div className="text-foreground h-7 w-auto">
+                <span className="logo-font text-2xl font-normal tracking-wide">Nainix</span>
+              </div>
+            </Link>
             <p className="max-w-md text-sm text-muted-foreground">
               Nainix helps clients hire developers and freelancers find projects with direct connection and unbeatable commission models.
             </p>

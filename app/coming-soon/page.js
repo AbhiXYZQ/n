@@ -198,13 +198,11 @@ export default function ComingSoonPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mb-4"
+          className="mb-8"
         >
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight">
-            <span className="bg-gradient-to-br from-white via-violet-200 to-indigo-400 bg-clip-text text-transparent">
-              Nainix
-            </span>
-          </h1>
+          <div className="h-16 sm:h-20 md:h-24 w-auto flex justify-center text-white">
+            <span className="logo-font text-2xl font-normal tracking-wide">Nainix</span>
+          </div>
         </motion.div>
 
         <motion.p

@@ -35,9 +35,9 @@ export default function Preloader() {
               transition={{ duration: 0.8 }}
               className="relative flex flex-col items-center"
             >
-              <h2 className="text-3xl font-bold tracking-[0.25em] text-white/90 uppercase">
-                Nainix
-              </h2>
+              <div className="h-10 w-auto flex justify-center text-white/90">
+                <span className="logo-font text-2xl font-normal tracking-wide">Nainix</span>
+              </div>
               <div className="h-[1px] w-8 bg-primary/40 mt-1" />
             </motion.div>
 
