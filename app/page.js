@@ -24,8 +24,24 @@ const fadeUp = {
 const LandingPage = () => {
   const { isAuthenticated } = useAuthStore();
   const [activeStep, setActiveStep] = useState(0);
+  const [realStats, setRealStats] = useState({
+    totalUsers: 0,
+    totalFreelancers: 0,
+    openJobs: 0,
+    recentActivity: []
+  });
 
   useEffect(() => {
+    // Fetch real stats
+    fetch('/api/stats/public')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setRealStats(data.stats);
+        }
+      })
+      .catch(err => console.error('Failed to fetch public stats:', err));
+
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 4);
     }, 4000);
@@ -173,79 +189,242 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* ── Social proof ticker ─────────────────────────────────────────── */}
-      <section className="w-full border-b bg-muted/30 py-3 overflow-hidden">
-        <div className="flex whitespace-nowrap animate-marquee">
-          {[...mockSuccessStories, ...mockSuccessStories].map((story, idx) => (
-            <span key={idx} className="mx-8 text-xs text-muted-foreground">
-              {story.text}
-            </span>
-          ))}
+      {/* ── Marketplace Pulse ─────────────────────────────────────────── */}
+      <section className="w-full border-y bg-muted/20 py-6 overflow-hidden relative">
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
+        </div>
+        <div className="container relative z-10">
+          <div className="flex items-center gap-8 whitespace-nowrap animate-marquee hover:pause-marquee cursor-default">
+            {(realStats.recentActivity.length > 0 ? realStats.recentActivity : [
+              { label: 'Recently Hired', text: 'Full-stack Developer for Fintech SaaS', icon: Code2 },
+              { label: 'New Project', text: 'AI Model Integration for Healthcare', icon: Zap },
+              { label: 'Verified', text: 'Sr. DevOps Engineer joined from Google', icon: Shield },
+              { label: 'Urgent SOS', text: 'React Native Expert needed for 48h sprint', icon: Star },
+              { label: 'Community', text: '12 New Collaboration Rooms created', icon: Users },
+            ]).map((item, idx) => (
+              <div 
+                key={idx} 
+                className="flex items-center gap-3 px-4 py-2 rounded-full border bg-background/50 backdrop-blur-sm shadow-sm"
+              >
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-primary">{item.label || (item.type === 'JOB' ? 'New Job' : 'Activity')}</span>
+                <span className="text-xs font-medium text-foreground/80">{item.text || item.title}</span>
+              </div>
+            ))}
+            {/* Repeat for seamless loop */}
+            {(realStats.recentActivity.length > 0 ? realStats.recentActivity : [
+              { label: 'Recently Hired', text: 'Full-stack Developer for Fintech SaaS', icon: Code2 },
+              { label: 'New Project', text: 'AI Model Integration for Healthcare', icon: Zap },
+              { label: 'Verified', text: 'Sr. DevOps Engineer joined from Google', icon: Shield },
+              { label: 'Urgent SOS', text: 'React Native Expert needed for 48h sprint', icon: Star },
+              { label: 'Community', text: '12 New Collaboration Rooms created', icon: Users },
+            ]).map((item, idx) => (
+              <div 
+                key={idx + 100} 
+                className="flex items-center gap-3 px-4 py-2 rounded-full border bg-background/50 backdrop-blur-sm shadow-sm"
+              >
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-primary">{item.label || (item.type === 'JOB' ? 'New Job' : 'Activity')}</span>
+                <span className="text-xs font-medium text-foreground/80">{item.text || item.title}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+ 
+      {/* ── Live Opportunities Preview ─────────────────────────────────── */}
+      {realStats.recentActivity.length > 0 && (
+        <section className="container py-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold tracking-tight">Live Opportunities</h2>
+              <p className="text-sm text-muted-foreground">Recently posted projects looking for experts.</p>
+            </div>
+            <Button variant="ghost" size="sm" asChild className="gap-1">
+              <Link href="/jobs">
+                View All Jobs <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {realStats.recentActivity.slice(0, 3).map((job, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="p-5 rounded-2xl border bg-card/50 hover:border-primary/30 hover:bg-card transition-all group"
+              >
+                <div className="flex flex-col h-full justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="inline-flex px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase">
+                      {job.category}
+                    </div>
+                    <h3 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                      {job.title}
+                    </h3>
+                  </div>
+                  <Button variant="secondary" size="sm" className="w-full text-xs h-8" asChild>
+                    <Link href="/jobs">View Details</Link>
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* ── Stats bar ───────────────────────────────────────────────────── */}
-      <section className="border-b bg-card">
-        <div className="container py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+      {/* ── Smart Trust & Performance Grid ─────────────────────────────── */}
+      <section className="border-b bg-card/50 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+        <div className="container py-12 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
-              { value: '1%', label: 'Minimum commission' },
-              { value: '500+', label: 'Registered developers' },
-              { value: '100%', label: 'Direct connections' },
-              { value: '₹0', label: 'Hidden fees' },
+              { 
+                value: '1%', 
+                label: 'Global Minimum Fee', 
+                detail: '99% Revenue Retention',
+                icon: Zap,
+                border: 'border-blue-500/20'
+              },
+              { 
+                value: realStats.totalFreelancers > 0 ? `${realStats.totalFreelancers}+` : '500+', 
+                label: 'Verified Devs', 
+                detail: 'GitHub/LinkedIn Vetted',
+                icon: Shield,
+                border: 'border-emerald-500/20'
+              },
+              { 
+                value: '0', 
+                label: 'Middleman Markup', 
+                detail: 'Direct P2P Connection',
+                icon: Users,
+                border: 'border-violet-500/20'
+              },
+              { 
+                value: realStats.openJobs > 0 ? `${realStats.openJobs}` : '24/7', 
+                label: realStats.openJobs > 0 ? 'Live Jobs Open' : 'Smart Monitoring', 
+                detail: 'AI Risk Assessment',
+                icon: CheckCircle2,
+                border: 'border-primary/20'
+              },
             ].map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
-                className="space-y-1"
+                transition={{ delay: i * 0.1 }}
+                className={`p-6 rounded-2xl border ${stat.border} bg-background/40 hover:bg-background/60 transition-colors group`}
               >
-                <p className="text-2xl sm:text-3xl font-bold text-primary">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="space-y-1">
+                    <p className="text-3xl font-black tracking-tight text-foreground">{stat.value}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary">{stat.label}</p>
+                  </div>
+                  <stat.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '100%' }}
+                      transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
+                      className="h-full bg-primary/40"
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap font-medium">{stat.detail}</span>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Features ────────────────────────────────────────────────────── */}
-      <section className="container py-20 sm:py-28">
+      {/* ── Smart Bento Features ────────────────────────────────────────── */}
+      <section className="container py-24 sm:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12 space-y-3"
+          className="text-center mb-16 space-y-4"
         >
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">Why Nainix</p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Built for Developers</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto text-base sm:text-lg">
-            A simple, fair workflow for both sides — post work, apply, and connect directly.
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">
+            <Zap className="h-3 w-3" />
+            The Future of Work
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">Built for the Next Generation</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            A decentralized approach to hiring. Direct, transparent, and powered by AI.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="group rounded-2xl border bg-card p-6 sm:p-8 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
-            >
-              <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl ${f.color}`}>
-                <f.icon className="h-6 w-6" />
+        <div className="grid grid-cols-1 md:grid-cols-6 grid-rows-none md:grid-rows-2 gap-4 h-full md:h-[600px]">
+          {/* Big Card 1: Direct Contact */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-3 md:row-span-2 relative overflow-hidden rounded-3xl border bg-card p-8 group"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Users className="h-40 w-40" />
+            </div>
+            <div className="relative z-10 h-full flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                  <Users className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl font-bold">Direct Connection</h3>
+                <p className="text-muted-foreground max-w-xs">
+                  Skip the middlemen. Share GitHub, LinkedIn, or WhatsApp. We provide the platform, you own the relationship.
+                </p>
               </div>
-              <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-            </motion.div>
-          ))}
+              <div className="mt-8 flex items-center gap-2 text-sm font-semibold text-primary">
+                Learn how it works <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 2: AI Matching */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-3 md:row-span-1 relative overflow-hidden rounded-3xl border bg-card p-8 group"
+          >
+            <div className="absolute -bottom-4 -right-4 h-24 w-24 bg-primary/10 blur-3xl rounded-full" />
+            <div className="relative z-10 flex gap-6 items-start">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-6 w-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold">Smart AI Matching</h3>
+                <p className="text-muted-foreground text-sm">
+                  Our engine analyzes technical depth and ranks the best-fit developers for every project in real-time.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 3: Commission */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="md:col-span-2 md:row-span-1 relative overflow-hidden rounded-3xl border bg-card p-8 group"
+          >
+            <div className="relative z-10 space-y-4">
+              <div className="h-10 w-10 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center">
+                <Zap className="h-5 w-5" />
+              </div>
+              <h3 className="text-lg font-bold leading-tight">1% Fee Model</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Retain 99% of your hard-earned money. No more 20% platform cuts.
+              </p>
+            </div>
+          </motion.div>
+
         </div>
       </section>
-
+ 
+      {/* ── Smart Platform Walkthrough ───────────────────────────────────── */}
       {/* ── How it works ────────────────────────────────────────────────── */}
       <section id="how-it-works" className="bg-muted/30 border-y">
         <div className="container py-20 sm:py-28">
@@ -280,7 +459,7 @@ const LandingPage = () => {
               >
                 A four-step process optimized for speed, quality, and direct connections.
               </motion.p>
-
+ 
               {/* Two action links */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -303,7 +482,7 @@ const LandingPage = () => {
                 </Button>
               </motion.div>
             </div>
-
+ 
             {/* Right: Steps */}
             <div className="space-y-3 min-h-[460px] flex flex-col justify-start">
               <AnimatePresence initial={false} mode="wait">
