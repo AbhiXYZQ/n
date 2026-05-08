@@ -1,323 +1,140 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Users, Briefcase, FileText, CreditCard, Home,
-  Sparkles, TrendingUp, TrendingDown, Minus,
-  UserCheck, UserX, Clock, RefreshCw
-} from 'lucide-react';
-import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
-} from 'recharts';
+import { Users, Briefcase, FileText, RefreshCw, UserCheck, Clock } from 'lucide-react';
 
-// ─── Stat Card ────────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, color, sub, loading }) {
+function StatCard({ label, value, sub, icon: Icon, loading }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/3 p-5 backdrop-blur-sm"
-      style={{ background: 'rgba(255,255,255,0.02)' }}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">{label}</p>
-          {loading ? (
-            <div className="h-8 w-20 rounded-lg bg-white/5 animate-pulse" />
-          ) : (
-            <p className="text-3xl font-black text-white tabular-nums">{value ?? '—'}</p>
-          )}
-          {sub && !loading && (
-            <p className="text-xs text-slate-500 mt-1.5">{sub}</p>
-          )}
-        </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
+    <div className="rounded-xl border border-white/6 bg-white/2 p-4">
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-xs text-slate-500 uppercase tracking-widest">{label}</p>
+        <Icon className="w-4 h-4 text-slate-600" />
       </div>
-      {/* Bottom glow */}
-      <div className={`absolute bottom-0 left-0 right-0 h-px opacity-40 ${color}`}
-        style={{ background: 'currentColor' }} />
-    </motion.div>
-  );
-}
-
-// ─── Section Header ───────────────────────────────────────────
-function SectionHeader({ title, sub }) {
-  return (
-    <div className="mb-4">
-      <h3 className="text-sm font-semibold text-white">{title}</h3>
-      {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
+      {loading
+        ? <div className="h-7 w-20 rounded bg-white/5 animate-pulse" />
+        : <p className="text-2xl font-bold text-white tabular-nums">{value ?? '—'}</p>
+      }
+      {sub && !loading && <p className="text-xs text-slate-600 mt-1">{sub}</p>}
     </div>
   );
 }
 
-const CHART_COLORS = ['#7c3aed', '#6366f1', '#a78bfa', '#818cf8', '#c4b5fd'];
-const PIE_COLORS  = ['#7c3aed', '#6366f1', '#e11d48'];
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-[#11112a] border border-violet-900/40 rounded-xl px-4 py-3 text-xs shadow-xl">
-      <p className="text-slate-400 mb-1">{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }} className="font-semibold">
-          {p.name}: {p.value}
-        </p>
-      ))}
-    </div>
-  );
+const ROLE_COLOR = {
+  CLIENT:     'text-sky-400 bg-sky-500/10',
+  FREELANCER: 'text-violet-400 bg-violet-500/10',
+  ADMIN:      'text-red-400 bg-red-500/10',
 };
 
 export default function AdminOverviewPage() {
-  const [stats, setStats]       = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [stats, setStats]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updated, setUpdated] = useState(null);
 
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Cache-bust: timestamp param + no-store headers bypass Vercel Edge Cache
       const res  = await fetch(`/api/admin/stats?t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
       });
       const data = await res.json();
-      if (data.success) {
-        setStats(data);
-        setLastUpdated(new Date());
-      }
+      if (data.success) { setStats(data); setUpdated(new Date()); }
     } catch (e) {
-      console.error('Failed to fetch admin stats', e);
-    } finally {
-      setLoading(false);
-    }
+      console.error('Failed to fetch stats', e);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchStats(); }, []);
 
-  const kpiCards = [
-    { label: 'Total Users',      value: stats?.totalUsers,      icon: Users,     color: 'bg-violet-600',  sub: `${stats?.newUsersToday ?? 0} joined in last 24h` },
-    { label: 'Total Jobs',       value: stats?.totalJobs,       icon: Briefcase, color: 'bg-indigo-600',  sub: `${stats?.openJobs ?? 0} currently open` },
-    { label: 'Total Proposals',  value: stats?.totalProposals,  icon: FileText,  color: 'bg-purple-600',  sub: `Across all jobs` },
-    { label: 'Revenue (₹)',      value: stats?.totalRevenue != null ? `₹${stats.totalRevenue.toLocaleString('en-IN')}` : null, icon: CreditCard, color: 'bg-emerald-600', sub: `Total earnings` },
-    { label: 'Collab Rooms',     value: stats?.totalCollab,     icon: Home,      color: 'bg-sky-600',     sub: `Active rooms` },
-    { label: 'AI Pro Users',     value: stats?.aiProUsers,      icon: Sparkles,  color: 'bg-amber-600',   sub: `Paying subscribers` },
-    { label: 'Waitlist',         value: stats?.waitlistCount,   icon: Users,     color: 'bg-pink-600',    sub: `Pre-launch signups` },
+  const cards = [
+    { label: 'Total Users',     value: stats?.totalUsers,     sub: `${stats?.newUsersToday ?? 0} in last 24h`, icon: Users },
+    { label: 'Total Jobs',      value: stats?.totalJobs,      sub: `${stats?.openJobs ?? 0} open`,            icon: Briefcase },
+    { label: 'Total Proposals', value: stats?.totalProposals, sub: 'Across all jobs',                          icon: FileText },
+    { label: 'Waitlist',        value: stats?.waitlistCount,  sub: 'Pre-launch signups',                       icon: UserCheck },
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl">
+    <div className="max-w-5xl space-y-6">
 
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Platform Overview</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString('en-IN')}` : 'Loading data...'}
-          </p>
+          <h2 className="text-lg font-bold text-white">Platform Overview</h2>
+          {updated && (
+            <p className="text-xs text-slate-600 mt-0.5 flex items-center gap-1">
+              <Clock className="w-3 h-3" /> Updated {updated.toLocaleTimeString('en-IN')}
+            </p>
+          )}
         </div>
         <button
           onClick={fetchStats}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600/20 border border-violet-500/30 text-violet-300 text-sm font-medium hover:bg-violet-600/30 transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/8 text-slate-400 text-xs hover:text-white hover:border-white/15 transition-all disabled:opacity-40"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-        {kpiCards.map((card, i) => (
-          <motion.div key={card.label} transition={{ delay: i * 0.05 }}>
-            <StatCard {...card} loading={loading} />
-          </motion.div>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {cards.map((c, i) => (
+          <StatCard key={i} {...c} loading={loading} />
         ))}
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* User Growth Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="lg:col-span-2 rounded-2xl border border-white/5 p-5"
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <SectionHeader title="User Growth" sub="New registrations — last 14 days" />
-          {loading ? (
-            <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={stats?.userGrowth || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="users" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 4, fill: '#7c3aed' }} activeDot={{ r: 6 }} name="Total Users" />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
-
-        {/* Role Pie Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="rounded-2xl border border-white/5 p-5"
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <SectionHeader title="User Roles" sub="Distribution by Role" />
-          {loading ? (
-            <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
-          ) : (
-            <div className="flex flex-col items-center">
-              <ResponsiveContainer width="100%" height={160}>
-                <PieChart>
-                  <Pie
-                    data={stats?.roleSplit || [{ name: 'Clients', value: 0 }, { name: 'Freelancers', value: 0 }, { name: 'Admins', value: 0 }]}
-                    cx="50%" cy="50%"
-                    innerRadius={50} outerRadius={70}
-                    paddingAngle={4} dataKey="value"
-                  >
-                    {(stats?.roleSplit || []).map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-col gap-2 w-full mt-4">
-                {['Clients', 'Freelancers', 'Admins'].map((role, i) => (
-                  <div key={role} className="flex items-center justify-between text-[11px] text-slate-400">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
-                      {role}
-                    </div>
-                    <span className="font-semibold text-white">{stats?.roleSplit?.find(r => r.name === role)?.value || 0}</span>
-                  </div>
+      {/* Recent Signups */}
+      <div className="rounded-xl border border-white/6 bg-white/2 overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/6">
+          <p className="text-sm font-semibold text-white">Recent Signups</p>
+          <p className="text-xs text-slate-600 mt-0.5">Last 10 users who joined</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/4">
+                {['Name', 'Email', 'Role', 'Joined'].map(h => (
+                  <th key={h} className="text-left text-[11px] text-slate-600 font-medium uppercase tracking-widest px-4 py-2.5">{h}</th>
                 ))}
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Jobs Per Week */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="rounded-2xl border border-white/5 p-5"
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <SectionHeader title="Jobs Posted" sub="Per week — last 8 weeks" />
-          {loading ? (
-            <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={stats?.jobsPerWeek || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="jobs" fill="#6366f1" radius={[4, 4, 0, 0]} name="Jobs" />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
-
-        {/* Revenue Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-          className="rounded-2xl border border-white/5 p-5"
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <SectionHeader title="Revenue" sub="Daily earnings — last 14 days (₹)" />
-          {loading ? (
-            <div className="h-48 rounded-xl bg-white/3 animate-pulse" />
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={stats?.revenueChart || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2.5} dot={false} name="Revenue (₹)" />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-        className="rounded-2xl border border-white/5 p-5"
-        style={{ background: 'rgba(255,255,255,0.02)' }}
-      >
-        <SectionHeader title="Recent Signups" sub="Latest users who joined the platform" />
-        {loading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-10 rounded-lg bg-white/3 animate-pulse" />
-            ))}
-          </div>
-        ) : !stats?.recentUsers?.length ? (
-          <p className="text-slate-500 text-sm">No recent signups found.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left text-xs text-slate-500 font-medium pb-3 pr-4">Name</th>
-                  <th className="text-left text-xs text-slate-500 font-medium pb-3 pr-4">Email</th>
-                  <th className="text-left text-xs text-slate-500 font-medium pb-3 pr-4">Role</th>
-                  <th className="text-left text-xs text-slate-500 font-medium pb-3 pr-4">Plan</th>
-                  <th className="text-left text-xs text-slate-500 font-medium pb-3">Joined</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {stats.recentUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/2 transition-colors">
-                    <td className="py-3 pr-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-violet-600/30 border border-violet-500/20 flex items-center justify-center text-[10px] font-bold text-violet-300 flex-shrink-0">
-                          {(u.name || u.email || '?')[0].toUpperCase()}
-                        </div>
-                        <span className="text-white font-medium truncate max-w-[120px]">{u.name || '—'}</span>
-                      </div>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/3">
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={4} className="px-4 py-3">
+                      <div className="h-5 rounded bg-white/3 animate-pulse" />
                     </td>
-                    <td className="py-3 pr-4 text-slate-400 truncate max-w-[160px]">{u.email}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide ${
-                        u.role === 'CLIENT' ? 'bg-sky-500/15 text-sky-400' :
-                        u.role === 'ADMIN'  ? 'bg-red-500/15 text-red-400' :
-                        'bg-violet-500/15 text-violet-400'
-                      }`}>
+                  </tr>
+                ))
+              ) : !stats?.recentUsers?.length ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-xs text-slate-600">
+                    No users yet.
+                  </td>
+                </tr>
+              ) : (
+                stats.recentUsers.map(u => (
+                  <tr key={u.id} className="hover:bg-white/2 transition-colors">
+                    <td className="px-4 py-2.5">
+                      <p className="text-sm text-white font-medium truncate max-w-[140px]">{u.name || '—'}</p>
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-500 text-xs truncate max-w-[180px]">{u.email}</td>
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${ROLE_COLOR[u.role] || 'text-slate-400 bg-white/5'}`}>
                         {u.role}
                       </span>
                     </td>
-                    <td className="py-3 pr-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide ${
-                        u.plan === 'AI_PRO' ? 'bg-amber-500/15 text-amber-400' : 'bg-white/5 text-slate-500'
-                      }`}>
-                        {u.plan || 'FREE'}
-                      </span>
-                    </td>
-                    <td className="py-3 text-slate-500 text-xs">
+                    <td className="px-4 py-2.5 text-xs text-slate-600 whitespace-nowrap">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </motion.div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

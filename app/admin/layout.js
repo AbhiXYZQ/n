@@ -4,33 +4,28 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Users, Briefcase, FileText, CreditCard,
-  Users2, Mail, BarChart3, Settings, LogOut, ExternalLink,
-  ChevronLeft, ChevronRight, Bell, Shield
+  LayoutDashboard, Users, Briefcase, FileText,
+  Settings, LogOut, ExternalLink, Menu, X, Shield
 } from 'lucide-react';
 
 const navItems = [
-  { label: 'Overview',     href: '/admin',            icon: LayoutDashboard },
-  { label: 'Users',        href: '/admin/users',       icon: Users },
-  { label: 'Jobs',         href: '/admin/jobs',        icon: Briefcase },
-  { label: 'Proposals',    href: '/admin/proposals',   icon: FileText },
-  { label: 'Payments',     href: '/admin/payments',    icon: CreditCard },
-  { label: 'Collab Rooms', href: '/admin/collab',      icon: Users2 },
-  { label: 'Email Center', href: '/admin/emails',      icon: Mail },
-  { label: 'Reports',      href: '/admin/reports',     icon: BarChart3 },
-  { label: 'Settings',     href: '/admin/settings',    icon: Settings },
+  { label: 'Overview',  href: '/admin',           icon: LayoutDashboard },
+  { label: 'Users',     href: '/admin/users',      icon: Users },
+  { label: 'Jobs',      href: '/admin/jobs',       icon: Briefcase },
+  { label: 'Proposals', href: '/admin/proposals',  icon: FileText },
+  { label: 'Settings',  href: '/admin/settings',   icon: Settings },
 ];
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
-  const [admin, setAdmin] = useState({ name: 'Admin', email: 'hello@nainix.me' });
+  const router   = useRouter();
+  const [open, setOpen]   = useState(false);
+  const [admin, setAdmin] = useState({ name: 'Admin', email: '' });
 
   useEffect(() => {
     fetch('/api/auth/me', { cache: 'no-store' })
       .then(r => r.json())
-      .then(d => { if (d.user) setAdmin({ name: d.user.name || 'Admin', email: d.user.email || 'hello@nainix.me' }); })
+      .then(d => { if (d.user) setAdmin({ name: d.user.name || 'Admin', email: d.user.email || '' }); })
       .catch(() => {});
   }, []);
 
@@ -39,114 +34,117 @@ export default function AdminLayout({ children }) {
     router.push('/login');
   };
 
-  return (
-    <div className="flex min-h-screen bg-[#080812] text-white">
+  const isActive = (href) =>
+    href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
-      {/* ── Sidebar ─────────────────────────────────────── */}
-      <aside
-        className={`relative flex flex-col border-r border-violet-900/30 bg-[#0a0a1a] transition-all duration-300 ease-in-out ${
-          collapsed ? 'w-[72px]' : 'w-[240px]'
-        }`}
-        style={{ minHeight: '100vh' }}
-      >
+  const currentLabel = navItems.find(n => isActive(n.href))?.label || 'Admin';
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+
+      {/* ── Sidebar (desktop) ───────────────────────────── */}
+      <aside className="hidden md:flex flex-col w-56 border-r border-white/6 bg-[#0d0d0d] fixed inset-y-0 left-0 z-20">
         {/* Logo */}
-        <div className={`flex items-center gap-3 px-4 py-5 border-b border-violet-900/20 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <Shield className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2.5 px-5 h-14 border-b border-white/6">
+          <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0">
+            <Shield className="w-3.5 h-3.5 text-white" />
           </div>
-          {!collapsed && (
-            <div>
-              <p className="text-sm font-bold text-white tracking-tight">Nainix</p>
-              <p className="text-[10px] text-violet-400 font-medium uppercase tracking-widest">Admin Panel</p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm font-bold text-white leading-none">Nainix</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Admin</p>
+          </div>
         </div>
 
-        {/* Nav Items */}
-        <nav className="flex-1 py-4 px-2 space-y-0.5">
-          {navItems.map(({ label, href, icon: Icon }) => {
-            const isActive = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={collapsed ? label : undefined}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group relative ${
-                  isActive
-                    ? 'bg-violet-600/20 text-violet-300 border border-violet-500/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Icon className={`flex-shrink-0 w-4 h-4 ${isActive ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
-                {!collapsed && <span>{label}</span>}
-                {isActive && !collapsed && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-400" />
-                )}
-              </Link>
-            );
-          })}
+        {/* Nav */}
+        <nav className="flex-1 py-3 px-2 space-y-0.5">
+          {navItems.map(({ label, href, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
+                isActive(href)
+                  ? 'bg-violet-600/15 text-white border border-violet-500/20'
+                  : 'text-slate-500 hover:text-white hover:bg-white/4'
+              }`}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span>{label}</span>
+            </Link>
+          ))}
         </nav>
 
-        {/* Bottom Actions */}
-        <div className="px-2 py-4 border-t border-violet-900/20 space-y-0.5">
-          <Link
-            href="/"
-            target="_blank"
-            title={collapsed ? 'View Website' : undefined}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all"
-          >
-            <ExternalLink className="flex-shrink-0 w-4 h-4" />
-            {!collapsed && <span>View Website</span>}
+        {/* Bottom */}
+        <div className="px-2 py-3 border-t border-white/6 space-y-0.5">
+          <Link href="/" target="_blank"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-500 hover:text-white hover:bg-white/4 transition-all">
+            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+            <span>View Site</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            title={collapsed ? 'Logout' : undefined}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
-          >
-            <LogOut className="flex-shrink-0 w-4 h-4" />
-            {!collapsed && <span>Logout</span>}
+          <button onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <span>Logout</span>
           </button>
         </div>
 
-        {/* Collapse Toggle Button */}
-        <button
-          onClick={() => setCollapsed(c => !c)}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-violet-600 border border-violet-500/50 flex items-center justify-center shadow-lg hover:bg-violet-500 transition-colors z-10"
-        >
-          {collapsed ? <ChevronRight className="w-3 h-3 text-white" /> : <ChevronLeft className="w-3 h-3 text-white" />}
-        </button>
+        {/* Admin info */}
+        <div className="px-4 py-3 border-t border-white/6">
+          <p className="text-xs font-medium text-white truncate">{admin.name}</p>
+          <p className="text-[10px] text-slate-500 truncate mt-0.5">{admin.email}</p>
+        </div>
       </aside>
 
-      {/* ── Main Content ─────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
-
-        {/* Topbar */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-violet-900/20 bg-[#080812] sticky top-0 z-10 backdrop-blur-sm">
-          <div>
-            <h2 className="text-sm font-semibold text-white">
-              {navItems.find(n => n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href))?.label || 'Admin'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Nainix Admin Dashboard</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="relative w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-              <Bell className="w-4 h-4 text-slate-400" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-violet-500" />
-            </button>
-            <div className="flex items-center gap-2 pl-3 border-l border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white">
-                {(admin.name || 'A')[0].toUpperCase()}
+      {/* ── Mobile sidebar overlay ───────────────────────── */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-30 flex">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
+          <aside className="relative w-56 bg-[#0d0d0d] border-r border-white/6 flex flex-col h-full z-10">
+            <div className="flex items-center justify-between px-5 h-14 border-b border-white/6">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
+                  <Shield className="w-3.5 h-3.5 text-white" />
+                </div>
+                <p className="text-sm font-bold">Nainix Admin</p>
               </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-white truncate max-w-[120px]">{admin.name}</p>
-                <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{admin.email}</p>
-              </div>
+              <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-slate-400" /></button>
             </div>
+            <nav className="flex-1 py-3 px-2 space-y-0.5">
+              {navItems.map(({ label, href, icon: Icon }) => (
+                <Link key={href} href={href} onClick={() => setOpen(false)}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
+                    isActive(href)
+                      ? 'bg-violet-600/15 text-white border border-violet-500/20'
+                      : 'text-slate-500 hover:text-white hover:bg-white/4'
+                  }`}>
+                  <Icon className="w-4 h-4" /><span>{label}</span>
+                </Link>
+              ))}
+            </nav>
+            <div className="px-2 py-3 border-t border-white/6">
+              <button onClick={handleLogout}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-500 hover:text-red-400 transition-all">
+                <LogOut className="w-4 h-4" /><span>Logout</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* ── Main content ────────────────────────────────── */}
+      <div className="flex-1 flex flex-col md:pl-56 min-w-0">
+        {/* Topbar */}
+        <header className="sticky top-0 z-10 h-14 border-b border-white/6 bg-[#0a0a0a] flex items-center justify-between px-5">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden" onClick={() => setOpen(true)}>
+              <Menu className="w-5 h-5 text-slate-400" />
+            </button>
+            <h1 className="text-sm font-semibold text-white">{currentLabel}</h1>
           </div>
+          <span className="text-xs text-slate-600 hidden sm:block">Nainix Admin</span>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        {/* Page */}
+        <main className="flex-1 p-5 overflow-auto">
           {children}
         </main>
       </div>
