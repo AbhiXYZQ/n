@@ -37,13 +37,24 @@ export async function PATCH(request, context) {
         update  = { is_banned: false, updated_at: new Date().toISOString() };
         message = 'User has been unbanned.';
         break;
-      case 'verify':
-        update  = {
-          contact_verification: { emailVerified: true, emailVerifiedAt: new Date().toISOString() },
-          updated_at: new Date().toISOString()
+      case 'verify': {
+        // BUG FIX: Use Supabase rpc or fetch-then-merge to avoid overwriting other JSONB fields
+        const { data: existing } = await supabase
+          .from('users')
+          .select('contact_verification')
+          .eq('id', id)
+          .maybeSingle();
+        update = {
+          contact_verification: {
+            ...(existing?.contact_verification || {}),
+            emailVerified: true,
+            emailVerifiedAt: new Date().toISOString(),
+          },
+          updated_at: new Date().toISOString(),
         };
         message = 'User email has been force-verified.';
         break;
+      }
       default:
         return NextResponse.json({ success: false, message: 'Invalid action.' }, { status: 400 });
     }

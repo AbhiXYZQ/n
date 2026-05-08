@@ -128,7 +128,7 @@ export default function AdminUsersPage() {
       });
       const res  = await fetch(`/api/admin/users?${params}&t=${Date.now()}`, {
         cache: 'no-store',
-        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
       });
       const data = await res.json();
       if (data.success) { setUsers(data.users); setTotal(data.total); }
@@ -141,10 +141,13 @@ export default function AdminUsersPage() {
     setSelected(null);
     if (action === 'delete' && !confirm(`Delete ${user.email}? This cannot be undone.`)) return;
     if (action === 'email') { window.open(`mailto:${user.email}`); return; }
-    const res  = await fetch(`/api/admin/users/${user.id}`, {
-      method: 'PATCH',
+
+    // BUG FIX: delete must use DELETE method; other actions use PATCH
+    const isDelete = action === 'delete';
+    const res = await fetch(`/api/admin/users/${user.id}`, {
+      method: isDelete ? 'DELETE' : 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
+      ...(isDelete ? {} : { body: JSON.stringify({ action }) }),
     });
     const data = await res.json();
     setActionMsg(data.message || 'Done');

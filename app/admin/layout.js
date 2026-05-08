@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -25,6 +25,14 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [admin, setAdmin] = useState({ name: 'Admin', email: 'hello@nainix.me' });
+
+  useEffect(() => {
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => { if (d.user) setAdmin({ name: d.user.name || 'Admin', email: d.user.email || 'hello@nainix.me' }); })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -127,11 +135,11 @@ export default function AdminLayout({ children }) {
             </button>
             <div className="flex items-center gap-2 pl-3 border-l border-white/10">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white">
-                A
+                {(admin.name || 'A')[0].toUpperCase()}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-white">Admin</p>
-                <p className="text-[10px] text-slate-500">hello@nainix.me</p>
+                <p className="text-xs font-semibold text-white truncate max-w-[120px]">{admin.name}</p>
+                <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{admin.email}</p>
               </div>
             </div>
           </div>

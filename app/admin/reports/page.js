@@ -22,7 +22,10 @@ export default function AdminReportsPage() {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/stats');
+      const res = await fetch(`/api/admin/stats?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const d   = await res.json();
       if (d.success) setData(d);
     } finally { setLoading(false); }

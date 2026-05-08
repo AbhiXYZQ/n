@@ -60,7 +60,10 @@ export default function AdminProposalsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page, limit: PAGE_SIZE, ...(search && { search }) });
-      const res = await fetch(`/api/admin/proposals?${params}`);
+      const res = await fetch(`/api/admin/proposals?${params}&t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) { setProposals(data.proposals); setTotal(data.total); }
     } finally { setLoading(false); }

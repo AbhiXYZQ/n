@@ -19,11 +19,16 @@ export async function GET(request) {
       '*, freelancer:users!proposals_freelancer_id_fkey(id,name,email), job:jobs(id,title,client:users!jobs_client_id_fkey(id,name))',
       { count: 'exact' }
     );
-    if (search) query = query.or(`freelancer.name.ilike.%${search}%`);
+    // BUG FIX: Supabase .or() cannot filter on foreign joined columns.
+    // Search on proposals' own columns (cover_letter) instead.
+    if (search) query = query.ilike('cover_letter', `%${search}%`);
     query = query.order('created_at', { ascending: false }).range(from, from + limit - 1);
     const { data, count, error } = await query;
     if (error) throw error;
-    return NextResponse.json({ success: true, proposals: data || [], total: count || 0, page, limit });
+    return NextResponse.json(
+      { success: true, proposals: data || [], total: count || 0, page, limit },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch (err) {
     console.error('[Admin Proposals]', err);
     return NextResponse.json({ success: false, message: 'Failed to fetch proposals.' }, { status: 500 });

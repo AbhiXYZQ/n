@@ -154,7 +154,10 @@ export default function AdminJobsPage() {
         ...(status !== 'ALL'   && { status }),
         ...(category !== 'ALL' && { category }),
       });
-      const res  = await fetch(`/api/admin/jobs?${params}`);
+      const res  = await fetch(`/api/admin/jobs?${params}&t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) { setJobs(data.jobs); setTotal(data.total); }
     } finally { setLoading(false); }

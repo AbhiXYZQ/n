@@ -33,7 +33,7 @@ export async function PATCH(request, context) {
     let message = '';
 
     switch (action) {
-      case 'feature':
+      case 'feature': {
         const nowFeatured = !job?.is_featured;
         update  = {
           is_featured:    nowFeatured,
@@ -42,16 +42,19 @@ export async function PATCH(request, context) {
         };
         message = nowFeatured ? 'Job is now featured for 30 days.' : 'Job has been unfeatured.';
         break;
+      }
 
-      case 'close':
+      case 'close': {
         update  = { status: 'COMPLETED', updated_at: new Date().toISOString() };
         message = 'Job has been closed.';
         break;
+      }
 
-      case 'delete':
+      case 'delete': {
         const { error: delErr } = await supabase.from('jobs').delete().eq('id', id);
         if (delErr) throw delErr;
         return NextResponse.json({ success: true, message: 'Job deleted successfully.' });
+      }
 
       default:
         return NextResponse.json({ success: false, message: 'Invalid action.' }, { status: 400 });

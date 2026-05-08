@@ -17,7 +17,10 @@ export default function AdminPaymentsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page, limit: PAGE_SIZE, ...(search && { search }) });
-      const res  = await fetch(`/api/admin/payments?${params}`);
+      const res  = await fetch(`/api/admin/payments?${params}&t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) {
         setPayments(data.payments);

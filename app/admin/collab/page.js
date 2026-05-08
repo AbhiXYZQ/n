@@ -46,7 +46,10 @@ export default function AdminCollabPage() {
   const fetchRooms = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/collab');
+      const res = await fetch(`/api/admin/collab?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) { setRooms(data.rooms); setTotal(data.total); }
     } finally { setLoading(false); }
