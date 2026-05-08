@@ -79,7 +79,11 @@ export default function AdminOverviewPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res  = await fetch('/api/admin/stats');
+      // Cache-bust: timestamp param + no-store headers bypass Vercel Edge Cache
+      const res  = await fetch(`/api/admin/stats?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) {
         setStats(data);

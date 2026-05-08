@@ -34,6 +34,22 @@ const nextConfig = {
           { key: "Access-Control-Allow-Headers", value: "*" },
         ],
       },
+      // ── Force-disable Vercel Edge Cache for all admin APIs ──
+      {
+        source: "/api/admin/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate" },
+          { key: "Pragma", value: "no-cache" },
+          { key: "Surrogate-Control", value: "no-store" },
+        ],
+      },
+      // Also disable cache for public stats API
+      {
+        source: "/api/stats/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
+        ],
+      },
     ];
   },
 };
